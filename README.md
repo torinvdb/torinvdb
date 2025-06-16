@@ -26,7 +26,8 @@ Here are some things I've worked on:
   - ↳ [GPT-4o](https://openai.com/index/gpt-4o-system-card/)
   - ↳ [Operator](https://openai.com/index/operator-system-card/)
   - ↳ [o3-mini](https://openai.com/index/o3-mini-system-card/)
-  - ↳ [Deep Research](https://openai.com/index/deep-research-system-card/)  
+  - ↳ [Deep Research](https://openai.com/index/deep-research-system-card/)
+  - ↳ [Case Study](https://control-plane.io/case-studies/openai-red-teaming/)
 - Co-authored AI readiness and alignment tools/frameworks
   - ↳ [AI Readiness (FINOS)](https://github.com/finos/ai-readiness)
   - ↳ [AI Governance Framework](https://github.com/torinvdb/ai-governance-framework)
