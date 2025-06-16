@@ -18,7 +18,7 @@ Here are some things I've worked on:
 
 ### 🔐 Open Source Threat Modeling
 - Co-authored threat models for ArgoCD and Envoy Gateway
-  - ↳ [Kubernetes GitOps Threat Model](https://control-plane.io/case-studies/the-linux-foundation-security-considerations-for-hardening-declarative-gitops-cd-on-kubernetes/)
+  - ↳ [ArgoCD End User Threat Model](https://github.com/argoproj/argoproj/blob/main/docs/end_user_threat_model.pdf)
   - ↳ [Envoy Gateway Threat Model](https://gateway.envoyproxy.io/latest/tasks/security/threat-model/)
 
 ### 🤖 AI Evaluation, Governance & Red Teaming
