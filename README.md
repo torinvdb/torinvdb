@@ -33,5 +33,7 @@ Here are some things I've worked on:
   - ↳ [AI Governance Framework](https://github.com/torinvdb/ai-governance-framework)
   - ↳ [A Game of Ethics](https://github.com/torinvdb/a-game-of-ethics)
   - ↳ [DynastAI (GRPO demo)](https://github.com/torinvdb/DynastAI-Demo)
+- Spearheaded foundational model red team assessments for R&D
+  - ↳ [Out on the GenAI Wild West: Part I - Red Team Redemption](https://control-plane.io/posts/ai-red-teaming-wild-west-part-1/)
 
 ---
