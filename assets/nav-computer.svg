@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Galaxy chart of Torin's work: 6 sectors, 21 systems">
+<title>Torin's nav computer</title>
+<style>
+  text { font-family: 'Chakra Petch', 'Segoe UI', Verdana, sans-serif; }
+  .ring { fill: none; stroke: #1e5d5a; stroke-width: 2; }
+  .main { fill: none; stroke: #7fe8e0; stroke-width: 2.5; }
+  .sector { fill: #7fe8e0; font-size: 30px; font-weight: 500; }
+  .sys { fill: #7fe8e0; font-size: 25px; }
+  .dot { fill: #e2fffb; animation: pulse 4s ease-in-out infinite; }
+  .core { fill: #e2fffb; font-size: 32px; font-weight: 600; text-anchor: middle; }
+  .core.sub { fill: #7fe8e0; font-size: 18px; font-weight: 400; }
+  .sweep { transform-origin: 500px 500px; animation: sweep 8s linear infinite; }
+  .r-small { fill: #7fe8e0; font-size: 26px; opacity: .8; }
+  .r-big { fill: #e2fffb; font-size: 46px; font-weight: 600; }
+  .r-mid { fill: #7fe8e0; font-size: 28px; }
+  .r-row { fill: #7fe8e0; font-size: 24px; }
+  .r-row.hot { fill: #e2fffb; font-weight: 600; }
+  .caret { fill: #7fe8e0; animation: blink 1.1s steps(1) infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+  @keyframes sweep { to { transform: rotate(360deg); } }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .dot, .sweep, .caret { animation: none; } }
+</style>
+<defs>
+  <radialGradient id="glass" cx="50%" cy="45%" r="70%">
+    <stop offset="0" stop-color="#06262a"/><stop offset="1" stop-color="#031417"/>
+  </radialGradient>
+  <pattern id="scan" width="4" height="3" patternUnits="userSpaceOnUse">
+    <rect y="2" width="4" height="1" fill="#000" fill-opacity=".22"/>
+  </pattern>
+</defs>
+<rect width="1600" height="900" rx="28" fill="#4a1717"/>
+<rect x="24" y="24" width="1064" height="852" rx="20" fill="#160707"/>
+<rect x="40" y="40" width="1032" height="820" rx="12" fill="url(#glass)"/>
+<svg x="40" y="40" width="1032" height="820" viewBox="-250 -40 1500 1080" preserveAspectRatio="xMidYMid meet">
+<path d="M-216.9 16.0L-225.0 3.0M-225.0 16.0L-208.9 16.0M-225.0 -10.0L-208.9 16.0M-201.9 16.0L-185.8 16.0M-201.9 -10.0L-193.8 16.0M-185.8 3.0L-201.9 -10.0M-162.6 16.0L-170.7 -10.0M-162.6 -10.0L-170.7 16.0M-147.6 16.0L-155.6 -10.0M-147.6 -10.0L-139.5 3.0M-139.5 -10.0L-147.6 16.0M-116.4 3.0L-132.5 -10.0M-116.4 16.0L-132.5 -10.0M-116.4 16.0L-132.5 16.0M-93.3 3.0L-109.4 3.0M-101.3 16.0L-101.3 -10.0M-78.2 16.0L-86.3 3.0M-86.3 3.0L-78.2 -10.0M-55.1 -10.0L-47.0 16.0M-63.2 3.0L-63.2 16.0M-40.0 16.0L-23.9 16.0M-40.0 3.0L-23.9 3.0M-32.0 -10.0L-23.9 3.0" fill="none" stroke="#7fe8e0" stroke-opacity=".7" stroke-width="3.7" stroke-linecap="square"/>
+<path d="M-213.8 28.0L-219.4 28.0M-202.3 28.0L-202.3 46.0M-179.5 28.0L-179.5 46.0M-190.7 28.0L-185.1 46.0M-179.5 28.0L-190.7 28.0M-162.4 46.0L-173.5 46.0M-162.4 46.0L-162.4 37.0M-150.8 28.0L-150.8 46.0M-156.4 37.0L-145.2 37.0M-150.8 46.0L-156.4 28.0M-139.2 28.0L-128.0 28.0M-139.2 37.0L-128.0 28.0M-133.6 46.0L-128.0 28.0" fill="none" stroke="#7fe8e0" stroke-opacity=".7" stroke-width="2.6" stroke-linecap="square"/>
+<circle class="ring" cx="500" cy="500" r="170"/>
+<circle class="ring" cx="500" cy="500" r="320"/>
+<circle class="main" cx="500" cy="500" r="470"/>
+<path class="main" d="M500.0 330.0 L500.0 180.0 A320 320 0 0 0 472.1 181.2 L459.0 31.8"/>
+<text class="sector" x="755.0" y="65.3" text-anchor="start">AI red teaming</text>
+<path class="main" d="M647.2 415.0 L777.1 340.0 A320 320 0 0 1 790.0 364.8 L926.0 301.4"/>
+<text class="sector" x="1010.0" y="507.0" text-anchor="start">Agentic systems</text>
+<path class="main" d="M647.2 585.0 L777.1 660.0 A320 320 0 0 0 790.0 635.2 L926.0 698.6"/>
+<text class="sector" x="755.0" y="948.7" text-anchor="start">AI governance</text>
+<path class="main" d="M500.0 670.0 L500.0 820.0 A320 320 0 0 1 472.1 818.8 L459.0 968.2"/>
+<text class="sector" x="245.0" y="948.7" text-anchor="end">DevSecOps and supply chain</text>
+<path class="main" d="M352.8 585.0 L222.9 660.0 A320 320 0 0 0 237.9 683.5 L115.0 769.6"/>
+<text class="sector" x="-10.0" y="507.0" text-anchor="end">Cloud native</text>
+<path class="main" d="M352.8 415.0 L222.9 340.0 A320 320 0 0 1 237.9 316.5 L115.0 230.4"/>
+<text class="sector" x="245.0" y="65.3" text-anchor="end">Zero Trust</text>
+<circle class="dot" style="animation-delay:0.00s" cx="544.7" cy="289.7" r="7"/>
+<text class="sys" x="558.7" y="295.7" text-anchor="start">GPT-4o</text>
+<circle class="dot" style="animation-delay:0.37s" cx="601.9" cy="207.2" r="7"/>
+<text class="sys" x="615.9" y="213.2" text-anchor="start">Operator</text>
+<circle class="dot" style="animation-delay:0.74s" cx="680.1" cy="137.2" r="7"/>
+<text class="sys" x="694.1" y="143.2" text-anchor="start">o3-mini</text>
+<circle class="dot" style="animation-delay:1.11s" cx="619.0" cy="320.9" r="7"/>
+<text class="sys" x="633.0" y="326.9" text-anchor="start">Deep Research</text>
+<circle class="dot" style="animation-delay:1.48s" cx="702.6" cy="265.3" r="7"/>
+<text class="sys" x="716.6" y="271.3" text-anchor="start">Wild West I</text>
+<circle class="dot" style="animation-delay:1.85s" cx="801.0" cy="229.0" r="7"/>
+<text class="sys" x="815.0" y="235.0" text-anchor="start">Wild West II</text>
+<circle class="dot" style="animation-delay:2.22s" cx="704.5" cy="433.6" r="7"/>
+<text class="sys" x="718.5" y="439.6" text-anchor="start">Agent runtime</text>
+<circle class="dot" style="animation-delay:2.59s" cx="808.3" cy="467.6" r="7"/>
+<text class="sys" x="822.3" y="473.6" text-anchor="start">AI Security training</text>
+<circle class="dot" style="animation-delay:2.96s" cx="902.8" cy="542.3" r="7"/>
+<text class="sys" x="916.8" y="548.3" text-anchor="start">A Game of Ethics</text>
+<circle class="dot" style="animation-delay:3.33s" cx="704.5" cy="566.4" r="7"/>
+<text class="sys" x="718.5" y="572.4" text-anchor="start">DynastAI</text>
+<circle class="dot" style="animation-delay:3.70s" cx="737.1" cy="713.5" r="7"/>
+<text class="sys" x="751.1" y="719.5" text-anchor="start">FINOS AI Governance</text>
+<circle class="dot" style="animation-delay:0.07s" cx="603.0" cy="678.4" r="7"/>
+<text class="sys" x="617.0" y="684.4" text-anchor="start">FINOS AI Readiness</text>
+<circle class="dot" style="animation-delay:0.44s" cx="584.2" cy="896.1" r="7"/>
+<text class="sys" x="598.2" y="902.1" text-anchor="start">AI Governance Framework</text>
+<circle class="dot" style="animation-delay:0.81s" cx="435.5" cy="803.2" r="7"/>
+<text class="sys" x="421.5" y="809.2" text-anchor="end">VEX remediation</text>
+<circle class="dot" style="animation-delay:1.18s" cx="392.5" cy="686.2" r="7"/>
+<text class="sys" x="378.5" y="692.2" text-anchor="end">Argo CD threat model</text>
+<circle class="dot" style="animation-delay:1.55s" cx="199.0" cy="771.0" r="7"/>
+<text class="sys" x="185.0" y="777.0" text-anchor="end">Repo-server RCE</text>
+<circle class="dot" style="animation-delay:1.92s" cx="205.2" cy="595.8" r="7"/>
+<text class="sys" x="191.2" y="601.8" text-anchor="end">Envoy Gateway threat model</text>
+<circle class="dot" style="animation-delay:2.29s" cx="295.5" cy="433.6" r="7"/>
+<text class="sys" x="281.5" y="439.6" text-anchor="end">EKS at Citi</text>
+<circle class="dot" style="animation-delay:2.66s" cx="262.9" cy="286.5" r="7"/>
+<text class="sys" x="248.9" y="292.5" text-anchor="end">SPIFFE and SPIRE</text>
+<circle class="dot" style="animation-delay:3.03s" cx="397.0" cy="321.6" r="7"/>
+<text class="sys" x="383.0" y="327.6" text-anchor="end">Intro to Zero Trust</text>
+<circle class="dot" style="animation-delay:3.40s" cx="415.8" cy="103.9" r="7"/>
+<text class="sys" x="401.8" y="109.9" text-anchor="end">High assurance at NIST</text>
+<circle cx="500" cy="500" r="92" fill="#031417" stroke="#7fe8e0" stroke-width="2.5"/>
+<text class="core" x="500" y="504">Torin</text>
+<text class="core sub" x="500" y="530">you are here</text>
+<g class="sweep"><path d="M500 500 L500 30" stroke="#e2fffb" stroke-opacity=".5" stroke-width="2"/></g>
+</svg>
+<rect x="40" y="40" width="1032" height="820" rx="12" fill="url(#scan)"/>
+<rect x="1108" y="24" width="468" height="852" rx="20" fill="#160707"/>
+<rect x="1124" y="40" width="436" height="820" rx="12" fill="url(#glass)"/>
+<g transform="translate(1160 110)">
+<text class="r-small" x="0" y="0">Core</text>
+<text class="r-big" x="0" y="48">Torin</text>
+<text class="r-mid" x="0" y="88">Security engineer</text>
+<text class="r-mid" x="0" y="122">ControlPlane</text>
+<text class="r-small" x="0" y="200">6 sectors, 21 systems</text>
+<text class="r-row hot" x="14" y="252" text-anchor="middle">6</text>
+<text class="r-row" x="42" y="252">AI red teaming</text>
+<text class="r-row hot" x="14" y="296" text-anchor="middle">4</text>
+<text class="r-row" x="42" y="296">Agentic systems</text>
+<text class="r-row hot" x="14" y="340" text-anchor="middle">3</text>
+<text class="r-row" x="42" y="340">AI governance</text>
+<text class="r-row hot" x="14" y="384" text-anchor="middle">3</text>
+<text class="r-row" x="42" y="384">DevSecOps and supply chain</text>
+<text class="r-row hot" x="14" y="428" text-anchor="middle">2</text>
+<text class="r-row" x="42" y="428">Cloud native</text>
+<text class="r-row hot" x="14" y="472" text-anchor="middle">3</text>
+<text class="r-row" x="42" y="472">Zero Trust</text>
+<text class="r-small" x="0" y="570">Click the chart to open the</text>
+<text class="r-small" x="0" y="602">interactive nav computer</text>
+<rect class="caret" x="0" y="624" width="16" height="26"/>
+</g>
+<rect x="1124" y="40" width="436" height="820" rx="12" fill="url(#scan)"/>
+<circle cx="1520" cy="824" r="7" fill="#ff4433"/><circle cx="1496" cy="824" r="7" fill="#ffb340"/>
+</svg>

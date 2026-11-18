@@ -1,0 +1,333 @@
+{
+  "core": {
+    "name": "Torin",
+    "role": "Security engineer at ControlPlane",
+    "summary": "Agentic security in regulated industry, mostly fintech: building the platform agents run on and red teaming them in a sandbox before they reach production.",
+    "links": [
+      {
+        "label": "GitHub",
+        "url": "https://github.com/torinvdb"
+      },
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/torin-v-56631812b/"
+      },
+      {
+        "label": "ControlPlane",
+        "url": "https://control-plane.io"
+      }
+    ]
+  },
+  "sectors": [
+    {
+      "id": "redteam",
+      "name": "AI red teaming",
+      "systems": [
+        {
+          "id": "gpt4o",
+          "name": "GPT-4o",
+          "year": "2024",
+          "kind": "Pre-release model",
+          "text": "Red teamed the multimodal model for OpenAI's Red Team Network: jailbreaks, prompt injection and multimodal adversarial input. Credited on the system card.",
+          "links": [
+            {
+              "label": "System card",
+              "url": "https://openai.com/index/gpt-4o-system-card/"
+            },
+            {
+              "label": "Case study",
+              "url": "https://control-plane.io/case-studies/openai-red-teaming/"
+            }
+          ]
+        },
+        {
+          "id": "operator",
+          "name": "Operator",
+          "year": "2025",
+          "kind": "Computer-using agent",
+          "text": "Red teamed OpenAI's computer-using agent for prompt injection, jailbreaks and misuse. Credited on the system card.",
+          "links": [
+            {
+              "label": "System card",
+              "url": "https://openai.com/index/operator-system-card/"
+            },
+            {
+              "label": "Case study",
+              "url": "https://control-plane.io/case-studies/openai-red-teaming/"
+            }
+          ]
+        },
+        {
+          "id": "o3mini",
+          "name": "o3-mini",
+          "year": "2025",
+          "kind": "Reasoning model",
+          "text": "Red teamed the reasoning model ahead of release for jailbreaks and misuse. Credited on the system card.",
+          "links": [
+            {
+              "label": "System card",
+              "url": "https://openai.com/index/o3-mini-system-card/"
+            },
+            {
+              "label": "Case study",
+              "url": "https://control-plane.io/case-studies/openai-red-teaming/"
+            }
+          ]
+        },
+        {
+          "id": "deepresearch",
+          "name": "Deep Research",
+          "year": "2025",
+          "kind": "Research agent",
+          "text": "Red teamed the research agent ahead of release for prompt injection, jailbreaks and misuse. Credited on the system card.",
+          "links": [
+            {
+              "label": "System card",
+              "url": "https://openai.com/index/deep-research-system-card/"
+            },
+            {
+              "label": "Case study",
+              "url": "https://control-plane.io/case-studies/openai-red-teaming/"
+            }
+          ]
+        },
+        {
+          "id": "wildwest1",
+          "name": "Wild West I",
+          "kind": "Blog post",
+          "text": "Out on the GenAI Wild West, Part I: Red Team Redemption. On foundation model red teaming.",
+          "links": [
+            {
+              "label": "Read it",
+              "url": "https://control-plane.io/posts/ai-red-teaming-wild-west-part-1/"
+            }
+          ]
+        },
+        {
+          "id": "wildwest2",
+          "name": "Wild West II",
+          "kind": "Blog post",
+          "text": "Out on the GenAI Wild West, Part II: The Long Arm of the Law. The second part of the series.",
+          "links": [
+            {
+              "label": "Read it",
+              "url": "https://control-plane.io/posts/ai-red-teaming-wild-west-part-2/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agentic",
+      "name": "Agentic systems",
+      "systems": [
+        {
+          "id": "runtime",
+          "name": "Agent runtime",
+          "kind": "Platform engineering",
+          "text": "Build and operate the runtime AI agents execute on at financial services clients: sandboxed execution, scoped identities and tool permissions, and the SRE work that keeps agent workloads observable and recoverable on Kubernetes.",
+          "links": []
+        },
+        {
+          "id": "training",
+          "name": "AI Security training",
+          "year": "2026",
+          "kind": "Course author and lead trainer",
+          "text": "Author and lead ControlPlane's AI Security training. The agent sandboxing content was built with Docker, who sponsored the 2026 North America roadshow, starting in Toronto and New York.",
+          "links": []
+        },
+        {
+          "id": "ethics",
+          "name": "A Game of Ethics",
+          "year": "2026",
+          "kind": "Open source eval harness",
+          "text": "Branching-scenario ethics evals for LLM agents. Co-founded it and presented it at KubeCon NA 2026 (Cloud Native AI + Inference Day).",
+          "links": [
+            {
+              "label": "Repository",
+              "url": "https://github.com/torinvdb/a-game-of-ethics"
+            }
+          ]
+        },
+        {
+          "id": "dynastai",
+          "name": "DynastAI",
+          "kind": "GRPO demo",
+          "text": "A reinforcement learning demo using GRPO.",
+          "links": [
+            {
+              "label": "Repository",
+              "url": "https://github.com/torinvdb/DynastAI-Demo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "governance",
+      "name": "AI governance",
+      "systems": [
+        {
+          "id": "finosgov",
+          "name": "FINOS AI Governance",
+          "kind": "Industry framework",
+          "text": "Contributor to the FINOS AI Governance Framework, which covers risks and controls for AI adoption in financial services.",
+          "links": [
+            {
+              "label": "Framework",
+              "url": "https://air-governance-framework.finos.org/"
+            }
+          ]
+        },
+        {
+          "id": "finosready",
+          "name": "FINOS AI Readiness",
+          "kind": "Industry framework",
+          "text": "Co-authored the FINOS AI readiness work for regulated industry.",
+          "links": [
+            {
+              "label": "Repository",
+              "url": "https://github.com/finos/ai-readiness"
+            }
+          ]
+        },
+        {
+          "id": "govrepo",
+          "name": "AI Governance Framework",
+          "kind": "Open source",
+          "text": "Open source AI governance framework.",
+          "links": [
+            {
+              "label": "Repository",
+              "url": "https://github.com/torinvdb/ai-governance-framework"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "devsecops",
+      "name": "DevSecOps and supply chain",
+      "systems": [
+        {
+          "id": "vex",
+          "name": "VEX remediation",
+          "kind": "Supply chain security",
+          "text": "Scanners produce more findings than any team can triage. I operationalize VEX so a finding comes with a statement about whether it's exploitable in that build, then use agentic remediation and sandboxed red teaming to work the ones that are.",
+          "links": []
+        },
+        {
+          "id": "argotm",
+          "name": "Argo CD threat model",
+          "year": "2023",
+          "kind": "CNCF end user threat model",
+          "text": "Co-authored the end user threat model for Argo CD with the maintainers: a multi-tenant deployment across clusters, attack trees for each exploit path, and prioritized recommendations.",
+          "links": [
+            {
+              "label": "Threat model",
+              "url": "https://github.com/argoproj/argoproj/blob/main/docs/end_user_threat_model.pdf"
+            },
+            {
+              "label": "Case study",
+              "url": "https://control-plane.io/case-studies/the-linux-foundation-security-considerations-for-hardening-declarative-gitops-cd-on-kubernetes/"
+            }
+          ]
+        },
+        {
+          "id": "argorce",
+          "name": "Repo-server RCE",
+          "year": "2026",
+          "kind": "Write-up",
+          "text": "An unauthenticated RCE in Argo CD's repo-server. The attack chain maps to findings ATM-014, ATM-015 and ATM-017 from the threat model. Internal does not mean isolated.",
+          "links": [
+            {
+              "label": "Read it",
+              "url": "https://control-plane.io/posts/argo-cd-repo-server-rce/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cloudnative",
+      "name": "Cloud native",
+      "systems": [
+        {
+          "id": "envoy",
+          "name": "Envoy Gateway threat model",
+          "kind": "CNCF end user threat model",
+          "text": "Built a multi-tenant cluster with Envoy Gateway implementing the Gateway API, threat modeled it from the end user's deployment, and worked with the maintainers to push fixes upstream.",
+          "links": [
+            {
+              "label": "Threat model",
+              "url": "https://gateway.envoyproxy.io/docs/tasks/security/threat-model/"
+            },
+            {
+              "label": "Blog post",
+              "url": "https://control-plane.io/posts/envoy-gateway-threat-model/"
+            }
+          ]
+        },
+        {
+          "id": "eks",
+          "name": "EKS at Citi",
+          "kind": "Security architecture",
+          "text": "Security architecture and engineering for EKS in a regulated environment.",
+          "links": [
+            {
+              "label": "Case study",
+              "url": "https://control-plane.io/case-studies/citigroup-security-architecture-and-engineering-for-eks/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zerotrust",
+      "name": "Zero Trust",
+      "systems": [
+        {
+          "id": "lfs482",
+          "name": "SPIFFE and SPIRE",
+          "kind": "Linux Foundation course, LFS482",
+          "text": "Courseware on building Zero Trust networks with SPIFFE/SPIRE, Envoy, OPA, OIDC and Kubernetes, with hands-on labs and threat-driven analysis of each design.",
+          "links": [
+            {
+              "label": "Course",
+              "url": "https://training.linuxfoundation.org/training/zero-trust-security-with-spiffe-and-spire-lfs482/"
+            },
+            {
+              "label": "Case study",
+              "url": "https://control-plane.io/case-studies/linuxfoundation-zero-trust-courseware/"
+            }
+          ]
+        },
+        {
+          "id": "lfs183",
+          "name": "Intro to Zero Trust",
+          "kind": "Linux Foundation course, LFS183",
+          "text": "The introductory Zero Trust course for the Linux Foundation, companion to LFS482.",
+          "links": [
+            {
+              "label": "Case study",
+              "url": "https://control-plane.io/case-studies/linuxfoundation-zero-trust-courseware/"
+            }
+          ]
+        },
+        {
+          "id": "nist",
+          "name": "High assurance at NIST",
+          "year": "2023",
+          "kind": "Conference write-up",
+          "text": "Takeaways on Zero Trust and high assurance from the NIST Multi-Cloud and OSCAL conferences.",
+          "links": [
+            {
+              "label": "Read it",
+              "url": "https://control-plane.io/posts/cp-at-nist-con-2023/"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
