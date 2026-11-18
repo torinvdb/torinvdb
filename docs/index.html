@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Torin's nav computer</title>
+<meta name="description" content="Torin's work in security, plotted as a galaxy chart. Hover or tab to a system to read about it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --panel: #4a1717;
+    --panel-hi: #6b2525;
+    --panel-seam: #2c0b0b;
+    --bezel: #160707;
+    --glass: #031417;
+    --line: #7fe8e0;
+    --line-dim: #1e5d5a;
+    --line-faint: #12403e;
+    --hot: #e2fffb;
+    --led-red: #ff4433;
+    --led-amber: #ffb340;
+    --text-on-panel: #e9c9c0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background-color: var(--panel);
+    background-image:
+      linear-gradient(90deg, transparent 0 calc(100% - 1px), var(--panel-seam) 0) 0 0 / 220px 100%,
+      linear-gradient(transparent 0 calc(100% - 1px), var(--panel-seam) 0) 0 0 / 100% 180px,
+      radial-gradient(ellipse at 30% 0%, var(--panel-hi), transparent 60%);
+    color: var(--text-on-panel);
+    font-family: "Chakra Petch", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  a { color: inherit; }
+
+  .console {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 20px 16px 28px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    grid-template-areas:
+      "strip strip"
+      "map readout"
+      "keys keys";
+    gap: 16px;
+  }
+
+  /* top strip: glyphs, title, indicator lights */
+  .strip {
+    grid-area: strip;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 4px;
+  }
+  .strip h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #f4ddd5;
+  }
+  .strip .glyphs { height: 22px; flex: 0 1 260px; }
+  .strip .glyphs path { stroke: var(--text-on-panel); opacity: 0.55; }
+  .lights { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .led {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #3a0d0d;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.6);
+  }
+  .led.on { background: var(--led-red); box-shadow: 0 0 8px var(--led-red); }
+  .led.amber.on { background: var(--led-amber); box-shadow: 0 0 8px var(--led-amber); }
+
+  /* screens */
+  .screen {
+    position: relative;
+    background: var(--bezel);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.06), 0 6px 18px rgba(0,0,0,.45);
+  }
+  .glass {
+    position: relative;
+    height: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 45%, #06262a 0%, var(--glass) 70%);
+    color: var(--line);
+  }
+  .glass::after {
+    /* scanlines */
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,.22) 2px 3px);
+    mix-blend-mode: multiply;
+  }
+  .map { grid-area: map; }
+  .readout { grid-area: readout; }
+
+  /* galaxy chart */
+  svg.chart { display: block; width: 100%; height: auto; }
+  .chart .ring, .chart .border { fill: none; stroke: var(--line-dim); stroke-width: 2; }
+  .chart .ring.main { stroke: var(--line); stroke-width: 2.5; }
+  .chart .border { stroke: var(--line); stroke-width: 2.5; }
+  .chart .wedge { fill: transparent; transition: fill .25s; }
+  .chart .sector.active .wedge { fill: rgba(127, 232, 224, 0.06); }
+  .chart.has-active .sector:not(.active) { opacity: 0.35; }
+  .chart .sector { transition: opacity .25s; }
+  .chart .sector-name { fill: var(--line); font-size: 30px; font-weight: 500; }
+  .chart .system { cursor: pointer; outline: none; }
+  .chart .system .dot { fill: var(--hot); filter: url(#glow); }
+  .chart .system .hit { fill: transparent; }
+  .chart .system text { fill: var(--line); font-size: 25px; }
+  .chart .system:hover text, .chart .system:focus-visible text, .chart .system.locked text { fill: var(--hot); }
+  .chart .core-disc { fill: var(--glass); stroke: var(--line); stroke-width: 2.5; }
+  .chart .core text { fill: var(--hot); font-size: 32px; font-weight: 600; text-anchor: middle; }
+  .chart .core .sub { font-size: 18px; font-weight: 400; fill: var(--line); }
+  .chart .core { cursor: pointer; outline: none; }
+  .chart .route { fill: none; stroke: var(--hot); stroke-width: 2; stroke-dasharray: 6 8; opacity: 0; }
+  .chart .route.on { opacity: 0.9; animation: march 0.9s linear infinite; }
+  @keyframes march { to { stroke-dashoffset: -28; } }
+  .chart .target { fill: none; stroke: var(--hot); stroke-width: 2.5; opacity: 0; transition: transform .18s ease-out, opacity .15s; }
+  .chart .target.on { opacity: 1; }
+  .chart .glyph-block path { stroke: var(--line); opacity: 0.7; }
+
+  /* boot: rings draw in once */
+  .booting .ring, .booting .border { stroke-dasharray: 3000; stroke-dashoffset: 3000; animation: draw 1.1s ease-out forwards; }
+  .booting .system, .booting .sector-name { opacity: 0; animation: appear .3s ease-out forwards; animation-delay: calc(0.9s + var(--i) * 35ms); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes appear { to { opacity: 1; } }
+
+  /* readout screen */
+  .readout .glass { padding: 22px 22px 24px; display: flex; flex-direction: column; min-height: 100%; }
+  .readout .sector-line { margin: 0; color: var(--line); opacity: 0.75; font-size: 0.95rem; }
+  .readout h2 { margin: 2px 0 2px; font-size: 1.6rem; font-weight: 600; color: var(--hot); line-height: 1.2; }
+  .readout .kind { margin: 0 0 14px; color: var(--line); font-size: 0.95rem; }
+  .readout p.body { margin: 0 0 18px; color: #bdf3ee; max-width: 60ch; }
+  .readout .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 6px; }
+  .readout .links a {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    color: var(--hot);
+    text-decoration: none;
+  }
+  .readout .links a:hover, .readout .links a:focus-visible { background: rgba(127,232,224,.14); outline: none; }
+  .readout ul.roster { list-style: none; margin: 0 0 18px; padding: 0; }
+  .readout ul.roster button {
+    font: inherit; color: var(--line); background: none; border: 0; padding: 4px 0; cursor: pointer; text-align: left;
+  }
+  .readout ul.roster button:hover, .readout ul.roster button:focus-visible { color: var(--hot); outline: none; text-decoration: underline; }
+  .readout .hint { color: var(--line); opacity: 0.7; font-size: 0.9rem; margin: 0 0 16px; }
+  .readout .no-links { color: var(--line); opacity: 0.6; font-size: 0.9rem; margin-top: auto; }
+
+  /* sector keys */
+  .keys {
+    grid-area: keys;
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  }
+  .keys button {
+    font: inherit; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 16px;
+    color: #f2d6ce;
+    background: linear-gradient(#3a1010, #260808);
+    border: 1px solid #5e2020;
+    border-bottom-width: 3px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .keys button .led { width: 8px; height: 8px; }
+  .keys button[aria-pressed="true"] { border-bottom-width: 1px; transform: translateY(2px); }
+  .keys button[aria-pressed="true"] .led { background: var(--led-amber); box-shadow: 0 0 8px var(--led-amber); }
+  .keys button:focus-visible, .chart .system:focus-visible .hit, .chart .core:focus-visible .core-disc { outline: 2px solid var(--led-amber); outline-offset: 2px; }
+  .keys .list-link { margin-left: auto; color: #f2d6ce; }
+
+  @media (max-width: 860px) {
+    .console {
+      grid-template-columns: 1fr;
+      grid-template-areas: "strip" "map" "readout" "keys";
+    }
+    .chart .system text { font-size: 34px; }
+    .keys { gap: 8px; }
+    .keys button { padding: 8px 12px; }
+    .strip .glyphs { display: none; }
+    .readout .glass { min-height: 0; }
+    .keys .list-link { margin-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .booting .ring, .booting .border, .booting .system, .booting .sector-name { animation: none; opacity: 1; stroke-dashoffset: 0; }
+    .chart .route.on { animation: none; }
+    .chart .target { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main class="console">
+  <header class="strip">
+    <svg class="glyphs" id="strip-glyphs" viewBox="0 0 260 22" aria-hidden="true"></svg>
+    <h1>Torin's nav computer</h1>
+    <div class="lights" aria-hidden="true">
+      <span class="led on" id="led-pulse"></span>
+      <span class="led amber on"></span>
+      <span class="led"></span>
+    </div>
+  </header>
+
+  <section class="screen map" aria-label="Galaxy chart of projects">
+    <div class="glass">
+      <svg class="chart booting" id="chart" viewBox="-250 -40 1500 1080" role="group" aria-label="Sectors and systems"></svg>
+    </div>
+  </section>
+
+  <section class="screen readout" aria-live="polite">
+    <div class="glass" id="readout"></div>
+  </section>
+
+  <nav class="keys" id="keys" aria-label="Sectors"></nav>
+</main>
+
+<script>
+(() => {
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const CX = 500, CY = 500, R_CORE = 92, R_IN = 170, R_MID = 320, R_OUT = 470;
+  const README = "https://github.com/torinvdb#readme";
+
+  const el = (tag, attrs = {}, parent) => {
+    const n = document.createElementNS(SVGNS, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+  const polar = (r, deg) => {
+    const a = (deg - 90) * Math.PI / 180;
+    return [CX + r * Math.cos(a), CY + r * Math.sin(a)];
+  };
+  const arc = (r, a0, a1) => {
+    const [x0, y0] = polar(r, a0), [x1, y1] = polar(r, a1);
+    return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+  };
+
+  // Seeded generator so the decorative glyphs are the same on every load.
+  let seed = 1977;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  // Decorative script: each glyph is two or three strokes inside a cell.
+  function glyphs(svg, x, y, count, size, gap) {
+    const g = el("g", { "aria-hidden": "true", class: "glyph-block", fill: "none", "stroke-width": size / 7, "stroke-linecap": "square" }, svg);
+    const pts = [[0, 0], [1, 0], [0, .5], [1, .5], [0, 1], [1, 1], [.5, 0], [.5, 1]];
+    for (let i = 0; i < count; i++) {
+      if (rand() < 0.14) continue;  // word gap
+      let d = "";
+      const n = 2 + Math.floor(rand() * 2);
+      for (let s = 0; s < n; s++) {
+        const a = pts[Math.floor(rand() * pts.length)], b = pts[Math.floor(rand() * pts.length)];
+        if (a === b) continue;
+        const ox = x + i * (size * 0.62 + gap);
+        d += `M${(ox + a[0] * size * .62).toFixed(1)} ${(y + a[1] * size).toFixed(1)}L${(ox + b[0] * size * .62).toFixed(1)} ${(y + b[1] * size).toFixed(1)}`;
+      }
+      el("path", { d }, g);
+    }
+    return g;
+  }
+
+  const state = { data: null, sectorIdx: null, locked: null, nodes: new Map() };
+
+  fetch("nav.json")
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => { state.data = data; build(); })
+    .catch(() => {
+      document.getElementById("readout").innerHTML =
+        `<h2>Chart data didn't load</h2><p class="body">Reload the page, or read the same list on <a href="${README}">GitHub</a>.</p>`;
+    });
+
+  function build() {
+    const { core, sectors } = state.data;
+    const chart = document.getElementById("chart");
+    const defs = el("defs", {}, chart);
+    const f = el("filter", { id: "glow", x: "-200%", y: "-200%", width: "500%", height: "500%" }, defs);
+    el("feGaussianBlur", { stdDeviation: "4", result: "b" }, f);
+    const m = el("feMerge", {}, f);
+    el("feMergeNode", { in: "b" }, m);
+    el("feMergeNode", { in: "SourceGraphic" }, m);
+
+    glyphs(document.getElementById("strip-glyphs"), 2, 3, 22, 16, 4);
+    glyphs(chart, -225, -10, 9, 26, 7);
+    glyphs(chart, -225, 28, 6, 18, 6);
+
+    // rings
+    el("circle", { class: "ring", cx: CX, cy: CY, r: R_IN }, chart);
+    el("circle", { class: "ring", cx: CX, cy: CY, r: R_MID }, chart);
+    el("circle", { class: "ring main", cx: CX, cy: CY, r: R_OUT }, chart);
+
+    const span = 360 / sectors.length;
+    const route = el("path", { class: "route", d: "" }, chart);
+    let order = 0;
+
+    sectors.forEach((sec, si) => {
+      const a0 = si * span, a1 = a0 + span;
+      const g = el("g", { class: "sector", "data-sector": si }, chart);
+
+      // wedge fill for highlighting
+      const P = (r, a) => polar(r, a).map(v => v.toFixed(1)).join(" ");
+      el("path", { class: "wedge", d: `M${P(R_OUT, a0)} A${R_OUT} ${R_OUT} 0 0 1 ${P(R_OUT, a1)} L${P(R_IN, a1)} A${R_IN} ${R_IN} 0 0 0 ${P(R_IN, a0)} Z` }, g);
+
+      // stepped sector border, like a hand-plotted chart
+      const jog = si % 2 ? 5 : -5;
+      el("path", { class: "border", d: `M${P(R_IN, a0)} L${P(R_MID, a0)} A${R_MID} ${R_MID} 0 0 ${jog > 0 ? 1 : 0} ${P(R_MID, a0 + jog)} L${P(R_OUT, a0 + jog)}` }, chart);
+
+      // sector name outside the rim
+      const mid = a0 + span / 2;
+      const [nx, ny] = polar(R_OUT + 40, mid);
+      const anchor = Math.abs(nx - CX) < 40 ? "middle" : nx > CX ? "start" : "end";
+      const name = el("text", { class: "sector-name", x: nx.toFixed(1), y: (ny + 7).toFixed(1), "text-anchor": anchor, style: `--i:${order++}` }, g);
+      name.textContent = sec.name;
+
+      // systems: spread across the wedge in two staggered bands
+      const n = sec.systems.length;
+      sec.systems.forEach((sys, k) => {
+        // three radial bands, angles spread across the wedge, so labels don't stack
+        const t = n === 1 ? 0.5 : k / (n - 1);
+        const ang = a0 + span * (0.2 + 0.6 * t);
+        const band = n <= 3 ? [1, 0, 2][k % 3] : k % 3;
+        const r = R_IN + 45 + band * 95;
+        const [x, y] = polar(r, ang);
+        const node = el("g", {
+          class: "system", tabindex: "0", role: "button",
+          "aria-label": `${sys.name}, ${sec.name}`, style: `--i:${order++}`,
+          "data-sector": si, "data-id": sys.id
+        }, g);
+        el("circle", { class: "hit", cx: x, cy: y, r: 26 }, node);
+        el("circle", { class: "dot", cx: x, cy: y, r: 7 }, node);
+        const right = x >= CX - 10;
+        const label = el("text", { x: (x + (right ? 14 : -14)).toFixed(1), y: (y + 6).toFixed(1), "text-anchor": right ? "start" : "end" }, node);
+        label.textContent = sys.name;
+        state.nodes.set(sys.id, { node, x, y, sys, si });
+
+        node.addEventListener("mouseenter", () => preview(sys.id));
+        node.addEventListener("mouseleave", () => restore());
+        node.addEventListener("focus", () => preview(sys.id));
+        node.addEventListener("blur", () => restore());
+        node.addEventListener("click", () => lock(sys.id));
+        node.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); lock(sys.id); }
+        });
+      });
+    });
+
+    relax();
+
+    // core
+    const coreG = el("g", { class: "core", tabindex: "0", role: "button", "aria-label": `${core.name}, ${core.role}` }, chart);
+    el("circle", { class: "core-disc", cx: CX, cy: CY, r: R_CORE }, coreG);
+    const t1 = el("text", { x: CX, y: CY + 4 }, coreG); t1.textContent = core.name;
+    const t2 = el("text", { class: "sub", x: CX, y: CY + 30 }, coreG); t2.textContent = "you are here";
+    coreG.addEventListener("click", () => reset());
+    coreG.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); reset(); } });
+
+    // targeting box (corner brackets)
+    const tgt = el("path", { class: "target", d: "M-24 -10V-24H-10M10 -24H24V-10M24 10V24H10M-10 24H-24V10" }, chart);
+    state.tgt = tgt; state.route = route; state.chart = chart;
+
+    // sector keys
+    const keys = document.getElementById("keys");
+    sectors.forEach((sec, si) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-pressed", "false");
+      b.innerHTML = `<span class="led" aria-hidden="true"></span>`;
+      b.append(sec.name);
+      b.addEventListener("click", () => selectSector(state.sectorIdx === si ? null : si));
+      keys.appendChild(b);
+    });
+    const list = document.createElement("a");
+    list.className = "list-link";
+    list.href = README;
+    list.textContent = "Read it as a list";
+    keys.appendChild(list);
+
+    document.addEventListener("keydown", e => { if (e.key === "Escape") reset(); });
+    setTimeout(() => chart.classList.remove("booting"), 2200);
+    // slow heartbeat on one indicator
+    const led = document.getElementById("led-pulse");
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setInterval(() => led.classList.toggle("on"), 900);
+    }
+    renderCore();
+  }
+
+  // Nudge systems along their radius until no two labels overlap.
+  function relax() {
+    const items = [...state.nodes.values()].map(n => {
+      const ang = Math.atan2(n.y - CY, n.x - CX);
+      return { n, ang, r: Math.hypot(n.x - CX, n.y - CY) };
+    });
+    const place = it => {
+      const x = CX + it.r * Math.cos(it.ang), y = CY + it.r * Math.sin(it.ang);
+      const [hit, dot, label] = it.n.node.children;
+      const dx = x - it.n.x, dy = y - it.n.y;
+      hit.setAttribute("cx", x); hit.setAttribute("cy", y);
+      dot.setAttribute("cx", x); dot.setAttribute("cy", y);
+      label.setAttribute("x", +label.getAttribute("x") + dx);
+      label.setAttribute("y", +label.getAttribute("y") + dy);
+      it.n.x = x; it.n.y = y;
+    };
+    const box = it => {
+      const b = it.n.node.children[2].getBBox();
+      return { x0: Math.min(b.x, it.n.x - 8), x1: Math.max(b.x + b.width, it.n.x + 8), y0: b.y - 4, y1: b.y + b.height + 4 };
+    };
+    for (let pass = 0; pass < 60; pass++) {
+      let moved = false;
+      for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+          const a = box(items[i]), b = box(items[j]);
+          if (a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1) {
+            const [lo, hi] = items[i].r <= items[j].r ? [items[i], items[j]] : [items[j], items[i]];
+            lo.r = Math.max(R_IN + 34, lo.r - 9);
+            hi.r = Math.min(R_OUT - 30, hi.r + 9);
+            place(lo); place(hi);
+            moved = true;
+          }
+        }
+      }
+      if (!moved) break;
+    }
+  }
+
+  function moveTarget(id) {
+    const n = id && state.nodes.get(id);
+    state.tgt.classList.toggle("on", !!n);
+    if (n) state.tgt.setAttribute("transform", `translate(${n.x.toFixed(1)} ${n.y.toFixed(1)})`);
+  }
+  function drawRoute(id) {
+    const n = id && state.nodes.get(id);
+    if (!n) { state.route.classList.remove("on"); return; }
+    const ang = Math.atan2(n.y - CY, n.x - CX);
+    const sx = CX + R_CORE * Math.cos(ang), sy = CY + R_CORE * Math.sin(ang);
+    // one dogleg, the way plotted hyperspace routes avoid a straight shot
+    const mx = (sx + n.x) / 2 + (n.y - sy) * 0.12, my = (sy + n.y) / 2 - (n.x - sx) * 0.12;
+    state.route.setAttribute("d", `M${sx.toFixed(1)} ${sy.toFixed(1)} L${mx.toFixed(1)} ${my.toFixed(1)} L${n.x.toFixed(1)} ${n.y.toFixed(1)}`);
+    state.route.classList.add("on");
+  }
+
+  function preview(id) { moveTarget(id); renderSystem(id); }
+  function restore() {
+    moveTarget(state.locked);
+    if (state.locked) renderSystem(state.locked);
+    else if (state.sectorIdx !== null) renderSector(state.sectorIdx);
+    else renderCore();
+  }
+  function lock(id) {
+    if (state.locked) state.nodes.get(state.locked).node.classList.remove("locked");
+    state.locked = id;
+    state.nodes.get(id).node.classList.add("locked");
+    selectSector(state.nodes.get(id).si, true);
+    drawRoute(id); moveTarget(id); renderSystem(id);
+  }
+  function reset() {
+    if (state.locked) state.nodes.get(state.locked).node.classList.remove("locked");
+    state.locked = null;
+    drawRoute(null); moveTarget(null);
+    selectSector(null);
+  }
+  function selectSector(si, quiet) {
+    state.sectorIdx = si;
+    state.chart.classList.toggle("has-active", si !== null);
+    state.chart.querySelectorAll(".sector").forEach(g => g.classList.toggle("active", +g.dataset.sector === si));
+    document.querySelectorAll("#keys button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === si)));
+    if (quiet) return;
+    if (state.locked && state.nodes.get(state.locked).si !== si) {
+      state.nodes.get(state.locked).node.classList.remove("locked");
+      state.locked = null; drawRoute(null); moveTarget(null);
+    }
+    si === null ? renderCore() : renderSector(si);
+  }
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const linkRow = links => links.length
+    ? `<div class="links">${links.map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("")}</div>`
+    : `<p class="no-links">No public write-up for this one.</p>`;
+
+  function renderCore() {
+    const c = state.data.core;
+    document.getElementById("readout").innerHTML = `
+      <p class="sector-line">Core</p>
+      <h2>${esc(c.name)}</h2>
+      <p class="kind">${esc(c.role)}</p>
+      <p class="body">${esc(c.summary)}</p>
+      <p class="hint">Point at a system, tap it or tab to it to read about it. Click or tap to plot a route. Pick a sector below to filter the chart, and press Escape to clear.</p>
+      ${linkRow(c.links)}`;
+  }
+  function renderSector(si) {
+    const s = state.data.sectors[si];
+    document.getElementById("readout").innerHTML = `
+      <p class="sector-line">Sector</p>
+      <h2>${esc(s.name)}</h2>
+      <p class="kind">${s.systems.length} systems</p>
+      <ul class="roster">${s.systems.map(y => `<li><button type="button" data-id="${esc(y.id)}">${esc(y.name)}</button></li>`).join("")}</ul>`;
+    document.querySelectorAll("#readout .roster button").forEach(b => b.addEventListener("click", () => lock(b.dataset.id)));
+  }
+  function renderSystem(id) {
+    const { sys, si } = state.nodes.get(id);
+    const sec = state.data.sectors[si];
+    const meta = [sys.kind, sys.year].filter(Boolean).join(", ");
+    document.getElementById("readout").innerHTML = `
+      <p class="sector-line">${esc(sec.name)}</p>
+      <h2>${esc(sys.name)}</h2>
+      <p class="kind">${esc(meta)}</p>
+      <p class="body">${esc(sys.text)}</p>
+      ${linkRow(sys.links)}`;
+  }
+})();
+</script>
+</body>
+</html>
