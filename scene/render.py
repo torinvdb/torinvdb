@@ -777,47 +777,65 @@ def add(p, dx, dy):
 K_STAND = dict(ff=(2, 0), fb=(-2, 0), kf=(1.5, -7), kb=(-1.5, -7), hip=(0, -13),
                chest=(0.5, -21), sh=(0.5, -20), head=(1, -25),
                ef=(2, -15.5), hf=(2.5, -11), eb=(-1.5, -15.5), hb=(-2, -11),
-               tail=(-5, -1))
+               tail=(-5, -1), hv=0)
 K_GESTURE = dict(K_STAND, ef=(3.5, -15), hf=(6.5, -16))
 K_CROUCH = dict(ff=(4, 0), fb=(-3, 0), kf=(6, -6), kb=(1, -4), hip=(-1, -8),
                 chest=(2, -15), sh=(2, -14), head=(4, -19),
                 ef=(5, -10), hf=(6, -6), eb=(0, -10), hb=(1, -2),
-                tail=(-7, 0))
+                tail=(-7, 0), hv=1)
 K_LEAP = dict(ff=(8, -5), fb=(-5, -1), kf=(7, -11), kb=(-1, -7), hip=(1, -14),
               chest=(4, -21), sh=(4, -20), head=(6, -25),
               ef=(1, -16), hf=(-3, -14), eb=(-1, -16), hb=(-5, -13),
-              tail=(-10, -6))
+              tail=(-10, -6), hv=1)
 K_FALL = dict(ff=(4, -2), fb=(-3, -3), kf=(4, -8), kb=(-2, -8), hip=(0, -14),
               chest=(0.5, -22), sh=(0.5, -21), head=(1, -26),
               ef=(5, -20), hf=(9, -23), eb=(-4, -20), hb=(-8, -23),
-              tail=(-8, -31))
+              tail=(-8, -31), hv=1)
 K_LAND = dict(ff=(6, 0), fb=(-5, 0), kf=(7, -5), kb=(-3, -2), hip=(-1, -7),
               chest=(2, -13), sh=(2, -12), head=(4, -17),
               ef=(6, -7), hf=(9, -1), eb=(-3, -11), hb=(-7, -9),
-              tail=(-10, 0))
+              tail=(-10, 0), hv=1)
 # Signature guard: saber hand high beside the head, blade up and over it,
 # off arm straight at Grievous with two fingers pointing, wide stance.
 K_GUARD = dict(ff=(7, 0), fb=(-6, 0), kf=(6.5, -6.5), kb=(-3.5, -6.5), hip=(0, -12),
                chest=(1.4, -20), sh=(1.2, -19.5), head=(2.4, -24.5),
                ef=(6, -19.6), hf=(10.5, -19.8), eb=(-3.6, -23.8), hb=(-1.2, -26.6),
-               tail=(-7, -1))
+               tail=(-7, -1), hv=0)
 K_SABER_DIR = (0.66, -0.75)
 
 
 # Hand-set pixel maps. One character per pixel, '.' is empty. Faces right.
-KEN_HEAD = [
-    "..dhhHHh...",
-    ".dhhHhhHhh.",
-    "dhhkSSSSSs.",
-    "dhhkswwSSs.",
-    "dhhkseiSSSS",
-    ".dhbssSskS.",
-    ".dbbbBBBB..",
-    "..dbbmmbb..",
-    "...dbbbb...",
+# Three-quarter head, 11 rows: hair swept back from a set-back hairline, the
+# ear behind the cheek, the eye at mid-height, a short beard on a defined jaw.
+KEN_HEAD_34 = [
+    "...ddhhd...",
+    "..dhhHHhhd.",
+    ".dhhHhhHhhh",
+    ".dhhhhhSSS.",
+    ".dhhhSSSSSs",
+    ".dhkkSwwSSs",
+    ".dhkSseiSSS",
+    "..dksSSSkS.",
+    "...bbBBBBs.",
+    "...dbbmmb..",
+    "....dbbb...",
+]
+# Profile, for the action poses: eye and nose further forward, ear centred.
+KEN_HEAD_PRO = [
+    "...ddhhd....",
+    "..dhhHHhhd..",
+    ".dhhHhhHhhh.",
+    ".dhhhhhhSSS.",
+    ".dhhhhSSSSSs",
+    ".dhhkkSSwwSs",
+    ".dhhkkSSSeiS",
+    "..dhkSSSSSkSS",
+    "...dbbbBBBB.",
+    "....dbbbmmb.",
+    ".....dbbbb..",
 ]
 KEN_HEAD_KEY = dict(d=(100, 48, 20), h=(152, 82, 38), H=(206, 132, 70),
-                    S=(246, 204, 170), s=(228, 166, 130), k=(182, 116, 86),
+                    S=(246, 204, 170), s=(226, 164, 128), k=(184, 118, 88),
                     w=(104, 52, 24), e=(236, 232, 222), i=(84, 122, 152),
                     b=(166, 94, 48), B=(122, 62, 30), m=(102, 48, 38))
 HAND_FIST = ["Ss", "ss"]
@@ -825,32 +843,52 @@ HAND_POINT = ["sSSS", "ss.."]
 HAND_KEY = dict(S=(246, 204, 170), s=(222, 160, 124))
 
 
+def cloth(s, top_b, top_f, hem_b, hem_f, wave, t, segs=5):
+    """A cloth panel: two shoulder points, a hem, rippling side edges and folds.
+    Works hanging down or trailing upward in the drop."""
+    def edge(a, b, phase):
+        pts = []
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        n = math.hypot(dx, dy) or 1.0
+        nx, ny = -dy / n, dx / n
+        for i in range(segs + 1):
+            u = i / segs
+            amp = 0.9 * u * math.sin(u * 5.0 + t * 0.8 + phase) + wave * 0.4 * u
+            pts.append((a[0] + dx * u + nx * amp, a[1] + dy * u + ny * amp))
+        return pts
+    back = edge(top_b, hem_b, 0.0)
+    front = edge(top_f, hem_f, 1.7)
+    mid_hem = ((hem_b[0] + hem_f[0]) / 2 + wave * 0.3, (hem_b[1] + hem_f[1]) / 2 +
+               (0.7 if hem_b[1] >= top_b[1] else -0.7))
+    s.poly(back + [mid_hem] + front[::-1])
+    return back, front
+
+
 def draw_kenobi(cv, ox, oy, p, d, t, flutter=1.0, point=0.0):
-    """Layered back to front: back arm in its sleeve, back leg, cloak back panel,
-    front leg, under-tunic, tunic with crossed flaps and skirt, tabard, belt,
-    the cloak's side drape, front arm in its bell sleeve, then neck and head."""
+    """Layered back to front: cloak back panel, back arm in its sleeve, back leg,
+    under-tunic and tunic, front leg, tunic skirt over both thighs, tabard, belt,
+    the cloak's near-side drape (shoulder to hip only, so it never crosses a leg),
+    the front arm in its bell sleeve, then neck and head."""
     s = Sprite(ox, oy, d, KEN_K)
     wave = math.sin(t * 0.9) * 1.2 * flutter
     sh, hip, tail, ch = p['sh'], p['hip'], p['tail'], p['chest']
     head = p['head']
     hd = (sh[0] + (head[0] - sh[0]) * 0.8, sh[1] + (head[1] - sh[1]) * 0.7)
     sh_f, sh_b = add(sh, 0.4, 0.3), add(sh, -0.9, 0.3)
-    hanging = tail[1] > hip[1]
-    hem_y = tail[1] if hanging else hip[1] + 1.5
     fold_dk = mix(K_ROBE[0], K_LINE, 0.35)
 
     def arm(shp, e, h, sep, hand):
         s.part(K_ROBE, sep)
         sid = s.pid
         s.disc(shp, 1.3)                                   # shoulder cap
-        s.tube(shp, e, 1.2, 1.1)
-        cuff = (lerp(e[0], h[0], 0.78), lerp(e[1], h[1], 0.78))
-        s.tube(e, cuff, 1.1, 1.75)                         # bell sleeve
+        s.tube(shp, e, 1.25, 1.15)
+        cuff = (lerp(e[0], h[0], 0.8), lerp(e[1], h[1], 0.8))
+        s.tube(e, cuff, 1.15, 1.75)                        # bell sleeve wraps the forearm
         ex, ey = s.pix(e)
         cx, cy = s.pix(cuff)
         s.paint_line((ex, ey + 1), (cx, cy + 1), fold_dk, pid=sid)
         s.part(K_UNDER)
-        s.disc(cuff, 0.75)                                 # inside of the cuff
+        s.disc(cuff, 0.7)                                  # inside of the cuff
         if hand == 'point':
             s.bitmap(h, HAND_POINT, HAND_KEY, (0, 1))
         else:
@@ -867,49 +905,52 @@ def draw_kenobi(cv, ox, oy, p, d, t, flutter=1.0, point=0.0):
         for i in (-2, -1, 0, 1, 2):
             s.paint(kx + i, ky, K_BOOT[2], pid=bid)        # boot cuff
 
-    # 1-2: back arm, back leg
+    # 1: cloak back panel, behind everything
+    s.part(K_ROBE)
+    cloak = s.pid
+    hanging = tail[1] > hip[1]
+    top_b, top_f = add(sh, -3.2, -0.2), add(sh, 0.4, -1.0)
+    hem_b = add(tail, -2.2 + wave, 0)
+    hem_f = (lerp(tail[0], hip[0], 0.35) + 2.6 + wave * 0.4, tail[1] + (0.8 if hanging else 1.5))
+    back, front = cloth(s, top_b, top_f, hem_b, hem_f, wave, t)
+    for f in (0.3, 0.55, 0.8):
+        pts = [s.pix((lerp(b[0], q[0], f), lerp(b[1], q[1], f))) for b, q in zip(back, front)]
+        for a, b in zip(pts, pts[1:]):
+            s.paint_line(a, b, fold_dk, pid=cloak)
+            s.paint_line((a[0] + d, a[1]), (b[0] + d, b[1]), K_ROBE[2], pid=cloak)
+
+    # 2-3: back arm in its sleeve, back leg
     arm(sh_b, p['eb'], p['hb'], False, 'fist')
     leg(add(hip, -0.7, 0), p['kb'], p['fb'])
 
-    # 3: cloak back panel, hanging from both shoulders and widening to the hem
-    s.part(K_ROBE)
-    cloak = s.pid
-    hem_b = add(tail, -2.2 + wave, 0)
-    hem_f = (lerp(tail[0], hip[0], 0.35) + 2.6 + wave * 0.4, tail[1] + 0.8)
-    back_top = add(sh, -3.4, -0.2)
-    billow = ((back_top[0] + hem_b[0]) / 2 - 1.2 - abs(wave) * 0.6,
-              (back_top[1] + hem_b[1]) / 2)
-    s.poly([add(sh, 0.6, -1.0), add(sh, -1.8, -1.1), back_top, billow,
-            hem_b, add(hem_b, 1.6, 0.9 + wave * 0.3), hem_f, add(hip, -0.5, 1)])
-    for f in (0.25, 0.6):
-        a = s.pix(add(sh, -2.8 + f, 0))
-        b = s.pix((lerp(hem_b[0], hem_f[0], f), lerp(hem_b[1], hem_f[1], f) - 0.3))
-        s.paint_line(a, b, fold_dk, pid=cloak)
-        s.paint_line((a[0] + d, a[1] + 2), (b[0] + d, b[1]), K_ROBE[2], pid=cloak)
-
-    # 4: front leg
-    leg(add(hip, 0.7, 0), p['kf'], p['ff'])
-
-    # neck sits between the shoulders, under the collar
+    # neck: rises from between the shoulders into the jaw, under the collar
+    hx, hy = s.pix(hd)
     s.part(K_SKIN)
-    s.tube(add(ch, 0.6, -1.0), add(hd, 0, 3.2), 0.8, 0.75)
+    nx, ny = s.pix(add(ch, 0.5, -1.0))
+    thick_line(s.plot, nx, ny, hx - 2 * d, hy + 3, 1.6)
 
-    # 5: dark under-tunic
+    # 4: dark under-tunic and the cream tunic, open in a V at the chest
     s.part(K_UNDER)
     s.poly([add(ch, -2.5, -1.4), add(ch, 2.6, -1.4), add(hip, 2.4, 0.5), add(hip, -2.4, 0.5)])
-
-    # 6: cream tunic, open in a V at the chest, skirt over the thigh tops
     s.part(K_TUNIC)
     tun = s.pid
     s.poly([add(ch, -2.6, -1.2), add(ch, 0.9, -1.3), add(ch, 1.8, 2.6), add(ch, 2.8, -1.0),
             add(hip, 2.5, 0), add(hip, -2.5, 0)])
+
+    # 5: front leg
+    leg(add(hip, 0.7, 0), p['kf'], p['ff'])
+
+    # 6: tunic skirt over the tops of both thighs, crossed flaps, collar
     kf, kb = p['kf'], p['kb']
-    sk_f = (lerp(hip[0], kf[0], 0.5) + 1.3, lerp(hip[1], kf[1], 0.5) + 0.4)
-    sk_b = (lerp(hip[0], kb[0], 0.5) - 1.3, lerp(hip[1], kb[1], 0.5) + 0.4)
+    sk_f = (lerp(hip[0], kf[0], 0.45) + 1.3, lerp(hip[1], kf[1], 0.45) + 0.4)
+    sk_b = (lerp(hip[0], kb[0], 0.45) - 1.3, lerp(hip[1], kb[1], 0.45) + 0.4)
     sk_m = ((sk_f[0] + sk_b[0]) / 2, max(sk_f[1], sk_b[1]) + 0.6)
+    s.part(K_TUNIC, True)
+    skirt = s.pid
     s.poly([add(hip, -2.7, -0.6), add(hip, 2.7, -0.6), sk_f, sk_m, sk_b])
+    s.paint_line(s.pix(add(hip, 0.4, 0)), s.pix(sk_m), K_TUNIC[0], pid=skirt)
     s.paint_line(s.pix(add(ch, 1.8, 2.6)), s.pix(add(hip, -0.6, 0)), K_TUNIC[0], pid=tun)
-    s.part(K_COLLAR, True)                                  # crossed front flaps
+    s.part(K_COLLAR, True)
     s.tube(add(sh, -1.2, -1.3), add(ch, 1.8, 2.6), 0.7, 0.5)
     s.tube(add(sh, 1.6, -1.2), add(ch, 1.9, 2.4), 0.55, 0.45)
 
@@ -925,38 +966,40 @@ def draw_kenobi(cv, ox, oy, p, d, t, flutter=1.0, point=0.0):
     s.part(K_BELT, True)
     s.poly([add(hip, -1.9, 0.3), add(hip, -0.6, 0.3), add(hip, -0.6, 1.8), add(hip, -1.9, 1.8)])
 
-    # 9: the cloak's side drape over the torso, open at the front
+    # 9: near-side drape, shoulder to just below the belt, open at the front
     s.part(K_ROBE, True)
     drape = s.pid
-    hm_b = (lerp(tail[0], hip[0], 0.5) - 1 + wave * 0.5, hem_y + 0.2)
-    hm_f = (hip[0] - 0.6, hem_y + 0.6)
     s.poly([add(sh, 0.9, -1.0), add(sh, -1.4, -1.2), add(ch, -3.0, 2.0), add(hip, -3.0, 1.0),
-            hm_b, hm_f, add(hip, -0.6, 1.5), add(ch, -0.4, 1.0)])
-    for f in (0.3, 0.65):
-        a = s.pix(add(sh, -1.0 + f, -1.0))
-        b = s.pix((lerp(hm_b[0], hm_f[0], f), hm_b[1] - 0.2))
+            add(hip, -2.2, 2.4), add(hip, -0.8, 2.2), add(ch, -0.4, 1.0)])
+    for f in (0.35, 0.7):
+        a = s.pix(add(sh, -1.0 + f, -0.8))
+        b = s.pix(add(hip, -2.8 + f * 2, 2.0))
         s.paint_line(a, b, fold_dk, pid=drape)
-    a, b = s.pix(add(ch, -0.4, 1.0)), s.pix(hm_f)
-    s.paint_line(a, b, K_ROBE[2], pid=drape)               # lit front edge
+    s.paint_line(s.pix(add(ch, -0.4, 1.0)), s.pix(add(hip, -0.8, 2.2)), K_ROBE[2], pid=drape)
 
     # 10: front arm in its bell sleeve
     arm(sh_f, p['ef'], p['hf'], True, 'point' if point > 0.5 else 'fist')
 
-    # 11: head and hair
-    s.bitmap(hd, KEN_HEAD, KEN_HEAD_KEY, (5, 4))
+    # 11: head, three-quarter or profile
+    if p.get('hv', 0) >= 0.5:
+        s.bitmap(hd, KEN_HEAD_PRO, KEN_HEAD_KEY, (6, 6))
+    else:
+        s.bitmap(hd, KEN_HEAD_34, KEN_HEAD_KEY, (5, 6))
     s.render(cv, K_LINE)
 
 
-# ---- Grievous, facing +x. Digitigrade legs, hunched, cloak behind.
-G_IDLE = dict(toe_f=(5, 0), heel_f=(2, -4), knee_f=(5, -12),
-              toe_b=(-2, 0), heel_b=(-5, -4), knee_b=(-2, -12),
-              hip=(0, -20), chest=(1, -31), head=(6, -34),
-              e1=(4, -25), h1=(5, -18), e2=(-2, -25), h2=(-2, -18),
-              e3=(4, -25), h3=(5, -18), e4=(-2, -25), h4=(-2, -18), spread=0.0)
-G_FOUR = dict(toe_f=(10, 0), heel_f=(6, -4), knee_f=(9, -12),
-              toe_b=(-5, 0), heel_b=(-9, -4), knee_b=(-4, -12),
-              hip=(0, -19), chest=(1, -30), head=(6, -33),
-              e1=(7, -36), h1=(11, -40), e2=(-4, -36), h2=(-8, -41),
+# ---- Grievous, facing +x: hunched skeletal frame, long digitigrade legs.
+# Leg chain: pelvis socket, forward knee, ankle high off the ground, short
+# metatarsal down to the ball of the foot, talons spread from there.
+G_IDLE = dict(knee_f=(4, -14), ankle_f=(1, -7), ball_f=(3, -1),
+              knee_b=(1, -14.5), ankle_b=(-3, -7.5), ball_b=(-1.5, -1),
+              hip=(0, -21), chest=(1.5, -31.5), head=(6.5, -35.5),
+              e1=(4.5, -26), h1=(5.5, -19.5), e2=(-1.5, -26), h2=(-1.5, -19.5),
+              e3=(4.5, -26), h3=(5.5, -19.5), e4=(-1.5, -26), h4=(-1.5, -19.5), spread=0.0)
+G_FOUR = dict(knee_f=(6, -13.5), ankle_f=(3.5, -6.5), ball_f=(6.5, -1),
+              knee_b=(-2.5, -13.5), ankle_b=(-6.5, -6.5), ball_b=(-5, -1),
+              hip=(0, -19.5), chest=(1.5, -30), head=(6.5, -34),
+              e1=(7, -35), h1=(11, -39.5), e2=(-4, -35), h2=(-8, -40),
               e3=(9, -23), h3=(12, -15), e4=(-6, -23), h4=(-10, -15), spread=1.0)
 
 
@@ -983,23 +1026,25 @@ GRV_MASK_KEY = dict(M=(216, 210, 188), L=(242, 238, 222), D=(168, 160, 138),
 
 
 def draw_grievous(cv, ox, oy, p, d, t):
-    """Cloak behind; back arms and legs; pelvis, organ sac, chest plate with two
-    shoulder sockets; long neck and small mask; front arms from the front socket."""
+    """Back to front: cloak from the shoulders; back arms; both legs; segmented
+    abdomen spine; pelvis plate over the thigh tops; rib frame around the organ
+    sac; hunched chest plate with two shoulder sockets; long neck and mask; front
+    arms from the front socket."""
     s = Sprite(ox, oy, d, GRV_K)
     sp = p['spread']
     ch, hip, hd = p['chest'], p['hip'], p['head']
     sway = math.sin(t * 0.5) * 0.6
-    sock_f, sock_b = add(ch, 1.8, -1.0), add(ch, -1.6, -0.8)
+    sock_f, sock_b = add(ch, 2.4, -2.2), add(ch, -1.8, -2.0)
 
     # cloak hanging from the shoulders, high collar behind the neck
     s.part(G_CAPE)
     cape = s.pid
     hem = [(-8 - 9 * sp + sway, -5 - 8 * sp), (-10 - 9 * sp + sway * 1.5, -3 - 7 * sp),
            (-5 - 6 * sp + sway, -4 - 4 * sp)]
-    s.poly([add(sock_f, 0.5, -1.2), add(ch, 0.8, -5.5), add(ch, -1.8, -6.5), add(ch, -4.4, -2.5)]
+    s.poly([add(sock_f, 0.3, -1.0), add(ch, 1.0, -6.0), add(ch, -1.6, -7.0), add(ch, -4.4, -3.0)]
            + hem + [(-1 - 3 * sp, -9 - 2 * sp), add(hip, -0.5, -2)])
     for f in (0.3, 0.65):
-        a = s.pix(add(ch, -2 - f, -2))
+        a = s.pix(add(ch, -2 - f, -2.5))
         b = s.pix((lerp(hem[0][0], hem[1][0], f), lerp(hem[0][1], hem[1][1], f) - 1))
         s.paint_line(a, b, G_CAPE[0], pid=cape)
         s.paint_line((a[0] - d, a[1] + 3), (b[0] - d, b[1] - 1), G_CAPE[2], pid=cape)
@@ -1021,48 +1066,77 @@ def draw_grievous(cv, ox, oy, p, d, t):
             cy = ux * math.sin(side) + uy * math.cos(side)
             thick_line(s.plot, hx, hy, hx + cx * 3, hy + cy * 3, 0.5)
 
-    def leg(sock, knee, heel, toe, front):
-        s.part(G_LIMB, front)
-        s.tube(sock, knee, 0.9, 0.7)
-        s.tube(knee, heel, 0.6, 0.5)
-        s.tube(heel, toe, 0.5, 0.42)
+    def leg(sock, knee, ankle, ball, front):
+        s.part(G_BONE, front)                              # plated thigh
+        tid = s.pid
+        s.tube(sock, knee, 1.2, 0.75)
+        a, b = s.pix(lerp_pt(sock, knee, 0.2)), s.pix(lerp_pt(sock, knee, 0.85))
+        s.paint_line(a, b, G_BONE[0], pid=tid)
+        s.part(G_LIMB, front)                              # twin shin struts
+        s.tube(knee, ankle, 0.38, 0.34)
+        kx, ky = s.pix(knee)
+        ax, ay = s.pix(ankle)
+        thick_line(s.plot, kx - d * 2, ky + 1, ax - d, ay - 1, 0.5)
+        s.tube(ankle, ball, 0.45, 0.38)                    # short metatarsal
         s.part(G_METAL)
-        s.disc(knee, 0.65)
-        s.disc(heel, 0.45)
-        tx, ty = s.pix(toe)
-        hx, hy = s.pix(heel)
+        s.disc(knee, 0.75)
+        s.disc(ankle, 0.55)
+        s.disc(ball, 0.4)
+        bx, by = s.pix(ball)
+        gy = by + 2                                        # the deck
         s.part(G_LIMB, front)
-        thick_line(s.plot, tx, ty, tx + d * 2, ty, 0.5)    # talon
-        thick_line(s.plot, hx, hy + 2, hx - d * 2, hy + 4, 0.5)
+        for tx in (5, 2, -2):                              # talons, spread
+            thick_line(s.plot, bx, by, bx + d * tx, gy, 0.5)
+        for tx in (5, 2, -2):
+            s.paint(bx + d * tx, gy, G_METAL[0])           # claw tips
 
     arm(sock_b, p['e4'], p['h4'], False)
     arm(sock_b, p['e2'], p['h2'], False)
-    leg(add(hip, -0.8, 0.5), p['knee_b'], p['heel_b'], p['toe_b'], False)
-    leg(add(hip, 0.8, 0.5), p['knee_f'], p['heel_f'], p['toe_f'], True)
-    # spine, pelvis, organ sac
-    s.part(G_METAL)
-    s.tube(hip, add(ch, 0, 2), 1.3, 1.1)
+    leg(add(hip, -0.9, 0.6), p['knee_b'], p['ankle_b'], p['ball_b'], False)
+    leg(add(hip, 0.9, 0.6), p['knee_f'], p['ankle_f'], p['ball_f'], True)
+    # narrow segmented abdomen spine, pelvis to rib frame
+    a, b = add(hip, 0.2, -1.0), add(ch, -0.2, 6.2)
+    for k in range(4):
+        s.part(G_METAL)
+        s.disc(lerp_pt(a, b, (k + 0.5) / 4), 0.75)
+    # pelvis plate over the thigh tops
     s.part(G_BONE, True)
-    s.poly([add(hip, -2.4, -1.2), add(hip, 2.8, -1.2), add(hip, 2.0, 1.8), add(hip, -1.8, 1.8)])
+    pel = s.pid
+    s.poly([add(hip, -2.2, -1.0), add(hip, 2.6, -1.2), add(hip, 2.0, 1.4), add(hip, -1.6, 1.6)])
+    s.paint_line(s.pix(add(hip, 0.3, -1.0)), s.pix(add(hip, 0.2, 1.4)), G_BONE[0], pid=pel)
+    # rib frame around the organ sac
     s.part(G_SAC, True)
-    s.disc(add(hip, 1.2, -3.4), 1.5)
-    # chest plate with its shoulder sockets
+    s.disc(add(ch, 0.9, 4.6), 1.6)
+    s.part(G_BONE, True)
+    for a, b in (((3.2, 2.4), (2.4, 6.4)), ((-1.8, 2.4), (-0.8, 6.4)),
+                 ((-1.4, 4.4), (2.9, 4.4)), ((-0.8, 6.4), (2.4, 6.4))):
+        s.tube(add(ch, *a), add(ch, *b), 0.32, 0.3)
+    # hunched chest plate with its shoulder sockets
     s.part(G_BONE, True)
     plate = s.pid
-    s.poly([add(ch, -3, -1.5), add(ch, 4, -0.5), add(ch, 3.2, 6), add(ch, -2.2, 5)])
-    for a, b in ((add(ch, 1, -0.5), add(ch, 0.5, 4.5)), (add(ch, -2.2, 3), add(ch, 3.3, 3.4))):
+    s.poly([add(ch, -2.6, -2.5), add(ch, 2.0, -3.2), add(ch, 4.2, -1.2), add(ch, 3.6, 2.8),
+            add(ch, -2.0, 2.6)])
+    for a, b in ((add(ch, 1.2, -2.8), add(ch, 0.8, 2.4)), (add(ch, -2.0, 0.8), add(ch, 3.8, 0.6))):
         s.paint_line(s.pix(a), s.pix(b), G_BONE[0], pid=plate)
     s.part(G_METAL)
     s.disc(sock_b, 0.75)
-    # long neck forward to the mask
+    # long neck reaching forward into the back of the mask
+    hx, hy = s.pix(hd)
+    nx, ny = s.pix(add(ch, 3.0, -2.6))
     s.part(G_METAL, True)
-    s.tube(add(ch, 2.2, -1.6), add(hd, -1.2, 2.5), 0.75, 0.6)
+    thick_line(s.plot, nx, ny, hx - 2 * d, hy + 4, 1.3)
+    s.part(G_LIMB)
+    thick_line(s.plot, nx, ny - 2, hx - 3 * d, hy + 2, 0.5)
     s.bitmap(hd, GRV_MASK, GRV_MASK_KEY, (4, 8))
     arm(sock_f, p['e1'], p['h1'], True)
     arm(sock_f, p['e3'], p['h3'], True)
     s.part(G_BONE, True)
     s.disc(sock_f, 0.85)                                    # shoulder cap
     s.render(cv, G_LINE)
+
+
+def lerp_pt(a, b, t):
+    return (lerp(a[0], b[0], t), lerp(a[1], b[1], t))
 
 
 def mix_ramp(ramp, c, t):
@@ -1542,9 +1616,7 @@ def render(out_path, scale):
         elif f < S + 6:
             u = (f - S) / 5
             gpose = dict(G_IDLE, spread=0.8 * math.sin(math.pi * u))
-            gd = lerp(1.0, -1.0, ease(u))
-            if abs(gd) < 0.25:
-                gd = 0.25 if u < 0.5 else -0.25
+            gd = (1.0, 0.82, 0.6, -0.6, -0.82, -1.0)[f - S]
         elif f < A:
             gpose, gd = G_IDLE, -1.0
         else:
