@@ -4,132 +4,165 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Torin's nav computer</title>
-<meta name="description" content="Torin's work in security, plotted as a galaxy chart. Hover or tab to a system to read about it.">
+<meta name="description" content="Torin's work in security, plotted as a galaxy chart. Point at, tap or tab to a system to read about it.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* Aurebesh by SilvinoR, SIL OFL-1.1: see fonts/AUREBESH-LICENSE.md */
+  @font-face {
+    font-family: "Aurebesh";
+    src: url("fonts/Aurebesh.ttf") format("truetype");
+    font-display: block;
+  }
   :root {
-    --panel: #4a1717;
-    --panel-hi: #6b2525;
-    --panel-seam: #2c0b0b;
-    --bezel: #160707;
-    --glass: #031417;
-    --line: #7fe8e0;
-    --line-dim: #1e5d5a;
-    --line-faint: #12403e;
-    --hot: #e2fffb;
-    --led-red: #ff4433;
-    --led-amber: #ffb340;
-    --text-on-panel: #e9c9c0;
+    --hull: #171b1c;
+    --hull-hi: #262c2e;
+    --hull-edge: #39423f;
+    --hull-deep: #0b0e0e;
+    --glass: #020b06;
+    --green: #6dff9e;
+    --green-mid: #3fbf6c;
+    --green-dim: #1c6a3c;
+    --green-faint: #0e3420;
+    --hot: #e2ffe9;
+    --red: #ff4a3a;
+    --amber: #ffb340;
+    --label: #a7b6b1;
+    --cut: 18px;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body {
     min-height: 100vh;
-    background-color: var(--panel);
-    background-image:
-      linear-gradient(90deg, transparent 0 calc(100% - 1px), var(--panel-seam) 0) 0 0 / 220px 100%,
-      linear-gradient(transparent 0 calc(100% - 1px), var(--panel-seam) 0) 0 0 / 100% 180px,
-      radial-gradient(ellipse at 30% 0%, var(--panel-hi), transparent 60%);
-    color: var(--text-on-panel);
+    background: #070909 radial-gradient(ellipse at 50% -10%, #1a2321 0%, #070909 60%);
+    color: var(--label);
     font-family: "Chakra Petch", system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.5;
+    padding: 20px 16px 28px;
   }
   a { color: inherit; }
+  .aurebesh { font-family: "Aurebesh", "Chakra Petch", sans-serif; letter-spacing: 0.04em; }
 
+  /* chamfered plates: an outer edge colour with an inset fill, both cut at the corners */
+  .chamfer {
+    clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)),
+                       calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut));
+  }
+
+  /* the console body */
   .console {
+    --cut: 28px;
     max-width: 1280px;
     margin: 0 auto;
-    padding: 20px 16px 28px;
+    padding: 2px;
+    background: var(--hull-edge);
+  }
+  .hull {
+    --cut: 27px;
+    background:
+      linear-gradient(90deg, transparent 0 calc(100% - 1px), rgba(0,0,0,.35) 0) 0 0 / 160px 100%,
+      linear-gradient(var(--hull-hi), var(--hull) 30%);
+    padding: 18px 22px 22px;
     display: grid;
     grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
     grid-template-areas:
-      "strip strip"
+      "top top"
       "map readout"
-      "keys keys";
+      "deck deck";
     gap: 16px;
   }
 
-  /* top strip: glyphs, title, indicator lights */
-  .strip {
-    grid-area: strip;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 8px 4px;
+  /* top rail */
+  .top {
+    grid-area: top;
+    display: flex; align-items: center; gap: 18px;
+    padding: 0 6px;
   }
-  .strip h1 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: #f4ddd5;
-  }
-  .strip .glyphs { height: 22px; flex: 0 1 260px; }
-  .strip .glyphs path { stroke: var(--text-on-panel); opacity: 0.55; }
-  .lights { margin-left: auto; display: flex; gap: 10px; align-items: center; }
-  .led {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: #3a0d0d;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,.6);
-  }
-  .led.on { background: var(--led-red); box-shadow: 0 0 8px var(--led-red); }
-  .led.amber.on { background: var(--led-amber); box-shadow: 0 0 8px var(--led-amber); }
+  .top h1 { margin: 0; font-size: 1.2rem; font-weight: 600; color: #dfe9e5; }
+  .top .aurebesh { color: var(--green-mid); font-size: 1.05rem; }
+  .top .status { margin-left: auto; display: flex; gap: 10px; align-items: center; font-size: 0.85rem; }
+  .led { width: 9px; height: 9px; border-radius: 50%; background: #2a1110; box-shadow: inset 0 1px 2px rgba(0,0,0,.7); flex: none; }
+  .led.on { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .led.amber.on { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .led.green.on { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .screw { width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #5a6461, #1b2020 70%); flex: none; }
 
-  /* screens */
-  .screen {
-    position: relative;
-    background: var(--bezel);
-    border-radius: 18px;
-    padding: 14px;
-    box-shadow: inset 0 2px 0 rgba(255,255,255,.06), 0 6px 18px rgba(0,0,0,.45);
-  }
+  /* screens: bezel, frame line, glass */
+  .bezel { --cut: 22px; padding: 2px; background: #4a5652; }
+  .bezel > .inner { --cut: 21px; background: var(--hull-deep); padding: 12px; height: 100%; }
   .glass {
+    --cut: 14px;
     position: relative;
     height: 100%;
-    border-radius: 10px;
-    overflow: hidden;
-    background: radial-gradient(ellipse at 50% 45%, #06262a 0%, var(--glass) 70%);
-    color: var(--line);
+    background:
+      linear-gradient(rgba(109,255,158,.035) 1px, transparent 1px) 0 0 / 100% 32px,
+      linear-gradient(90deg, rgba(109,255,158,.035) 1px, transparent 1px) 0 0 / 32px 100%,
+      radial-gradient(ellipse at 50% 45%, #052012 0%, var(--glass) 72%);
+    color: var(--green);
+    box-shadow: inset 0 0 0 1px var(--green-faint);
+  }
+  .glass::before {
+    /* corner brackets on the glass */
+    content: "";
+    position: absolute; inset: 8px;
+    pointer-events: none;
+    --b: 18px;
+    background:
+      linear-gradient(var(--green-dim), var(--green-dim)) top left / var(--b) 2px no-repeat,
+      linear-gradient(var(--green-dim), var(--green-dim)) top left / 2px var(--b) no-repeat,
+      linear-gradient(var(--green-dim), var(--green-dim)) top right / var(--b) 2px no-repeat,
+      linear-gradient(var(--green-dim), var(--green-dim)) top right / 2px var(--b) no-repeat,
+      linear-gradient(var(--green-dim), var(--green-dim)) bottom left / var(--b) 2px no-repeat,
+      linear-gradient(var(--green-dim), var(--green-dim)) bottom left / 2px var(--b) no-repeat,
+      linear-gradient(var(--green-dim), var(--green-dim)) bottom right / var(--b) 2px no-repeat,
+      linear-gradient(var(--green-dim), var(--green-dim)) bottom right / 2px var(--b) no-repeat;
   }
   .glass::after {
-    /* scanlines */
+    /* scanlines and a soft edge falloff */
     content: "";
     position: absolute; inset: 0;
     pointer-events: none;
-    background: repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,.22) 2px 3px);
-    mix-blend-mode: multiply;
+    background:
+      repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,.25) 2px 3px),
+      radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.45) 100%);
+  }
+  .screen-bar {
+    position: relative; z-index: 1;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 20px 0;
+    color: var(--green-dim);
+    font-size: 0.85rem;
   }
   .map { grid-area: map; }
   .readout { grid-area: readout; }
 
   /* galaxy chart */
-  svg.chart { display: block; width: 100%; height: auto; }
-  .chart .ring, .chart .border { fill: none; stroke: var(--line-dim); stroke-width: 2; }
-  .chart .ring.main { stroke: var(--line); stroke-width: 2.5; }
-  .chart .border { stroke: var(--line); stroke-width: 2.5; }
-  .chart .wedge { fill: transparent; transition: fill .25s; }
-  .chart .sector.active .wedge { fill: rgba(127, 232, 224, 0.06); }
-  .chart.has-active .sector:not(.active) { opacity: 0.35; }
-  .chart .sector { transition: opacity .25s; }
-  .chart .sector-name { fill: var(--line); font-size: 30px; font-weight: 500; }
+  svg.chart { display: block; width: 100%; height: auto; position: relative; z-index: 1; }
+  .chart .ring { fill: none; stroke: var(--green-dim); stroke-width: 2; }
+  .chart .ring.main, .chart .border { fill: none; stroke: var(--green); stroke-width: 2.5; }
+  .chart .wedge { fill: transparent; stroke: none; transition: fill .2s; }
+  .chart .sector.active .wedge { fill: rgba(109,255,158,.09); }
+  .chart .sector { transition: opacity .2s; }
+  .chart.has-active .sector:not(.active) { opacity: 0.3; }
+  .chart .sector-name { fill: var(--green-mid); font-size: 30px; font-weight: 500; }
+  .chart .sector.active .sector-name { fill: var(--hot); }
   .chart .system { cursor: pointer; outline: none; }
   .chart .system .dot { fill: var(--hot); filter: url(#glow); }
   .chart .system .hit { fill: transparent; }
-  .chart .system text { fill: var(--line); font-size: 25px; }
-  .chart .system:hover text, .chart .system:focus-visible text, .chart .system.locked text { fill: var(--hot); }
-  .chart .core-disc { fill: var(--glass); stroke: var(--line); stroke-width: 2.5; }
+  .chart .system text { fill: var(--green); font-size: 25px; }
+  .chart .system:hover text, .chart .system:focus-visible text, .chart .system.locked text { fill: var(--hot); filter: url(#glow); }
+  .chart .core-disc { fill: var(--glass); stroke: var(--green); stroke-width: 2.5; }
   .chart .core text { fill: var(--hot); font-size: 32px; font-weight: 600; text-anchor: middle; }
-  .chart .core .sub { font-size: 18px; font-weight: 400; fill: var(--line); }
+  .chart .core .sub { font-size: 18px; font-weight: 400; fill: var(--green-mid); }
   .chart .core { cursor: pointer; outline: none; }
-  .chart .route { fill: none; stroke: var(--hot); stroke-width: 2; stroke-dasharray: 6 8; opacity: 0; }
-  .chart .route.on { opacity: 0.9; animation: march 0.9s linear infinite; }
-  @keyframes march { to { stroke-dashoffset: -28; } }
-  .chart .target { fill: none; stroke: var(--hot); stroke-width: 2.5; opacity: 0; transition: transform .18s ease-out, opacity .15s; }
+  .chart .route { fill: none; stroke: var(--hot); stroke-width: 2.5; stroke-dasharray: 8 9; opacity: 0; filter: url(#glow); }
+  .chart .route.on { opacity: 0.95; animation: march 0.9s linear infinite; }
+  @keyframes march { to { stroke-dashoffset: -34; } }
+  .chart .target { fill: none; stroke: var(--hot); stroke-width: 3; opacity: 0; transition: transform .16s ease-out, opacity .12s; filter: url(#glow); }
   .chart .target.on { opacity: 1; }
-  .chart .glyph-block path { stroke: var(--line); opacity: 0.7; }
+  .chart .corner-script { fill: var(--green-mid); font-family: "Aurebesh", sans-serif; }
 
   /* boot: rings draw in once */
   .booting .ring, .booting .border { stroke-dasharray: 3000; stroke-dashoffset: 3000; animation: draw 1.1s ease-out forwards; }
@@ -137,63 +170,87 @@
   @keyframes draw { to { stroke-dashoffset: 0; } }
   @keyframes appear { to { opacity: 1; } }
 
-  /* readout screen */
-  .readout .glass { padding: 22px 22px 24px; display: flex; flex-direction: column; min-height: 100%; }
-  .readout .sector-line { margin: 0; color: var(--line); opacity: 0.75; font-size: 0.95rem; }
-  .readout h2 { margin: 2px 0 2px; font-size: 1.6rem; font-weight: 600; color: var(--hot); line-height: 1.2; }
-  .readout .kind { margin: 0 0 14px; color: var(--line); font-size: 0.95rem; }
-  .readout p.body { margin: 0 0 18px; color: #bdf3ee; max-width: 60ch; }
+  /* readout */
+  .readout .glass { display: flex; flex-direction: column; }
+  .readout .body-wrap { position: relative; z-index: 1; padding: 14px 24px 26px; display: flex; flex-direction: column; flex: 1; }
+  .readout .sector-line { margin: 0; color: var(--green-mid); font-size: 0.95rem; }
+  .readout h2 { margin: 2px 0 2px; font-size: 1.6rem; font-weight: 600; color: var(--hot); line-height: 1.2; text-shadow: 0 0 10px rgba(109,255,158,.45); }
+  .readout .kind { margin: 0 0 14px; color: var(--green); font-size: 0.95rem; }
+  .readout p.body { margin: 0 0 18px; color: #b9f7cb; max-width: 60ch; }
   .readout .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 6px; }
   .readout .links a {
+    --cut: 7px;
     display: inline-block;
-    padding: 6px 12px;
-    border: 1.5px solid var(--line);
-    border-radius: 4px;
+    padding: 7px 14px;
+    background: var(--green-faint);
+    box-shadow: inset 0 0 0 1.5px var(--green);
     color: var(--hot);
     text-decoration: none;
   }
-  .readout .links a:hover, .readout .links a:focus-visible { background: rgba(127,232,224,.14); outline: none; }
+  .readout .links a:hover, .readout .links a:focus-visible { background: var(--green-dim); outline: none; }
   .readout ul.roster { list-style: none; margin: 0 0 18px; padding: 0; }
-  .readout ul.roster button {
-    font: inherit; color: var(--line); background: none; border: 0; padding: 4px 0; cursor: pointer; text-align: left;
-  }
+  .readout ul.roster button { font: inherit; color: var(--green); background: none; border: 0; padding: 4px 0; cursor: pointer; text-align: left; }
   .readout ul.roster button:hover, .readout ul.roster button:focus-visible { color: var(--hot); outline: none; text-decoration: underline; }
-  .readout .hint { color: var(--line); opacity: 0.7; font-size: 0.9rem; margin: 0 0 16px; }
-  .readout .no-links { color: var(--line); opacity: 0.6; font-size: 0.9rem; margin-top: auto; }
+  .readout .hint { color: var(--green-mid); font-size: 0.9rem; margin: 0 0 16px; }
+  .readout .no-links { color: var(--green-dim); font-size: 0.9rem; margin-top: auto; }
+  /* characters still in Aurebesh while a readout decodes */
+  .ab { font-family: "Aurebesh", sans-serif; color: var(--green-mid); }
+  .ab.cursor { color: var(--hot); }
 
-  /* sector keys */
-  .keys {
-    grid-area: keys;
-    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  /* control deck, part of the same console */
+  .deck {
+    grid-area: deck;
+    --cut: 14px;
+    padding: 2px;
+    background: #0a0d0d;
   }
-  .keys button {
+  .deck > .tray {
+    --cut: 13px;
+    background: linear-gradient(#111515, #1b2021);
+    padding: 14px 16px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,.6);
+  }
+  .deck .label { font-size: 0.85rem; color: var(--label); margin-right: 4px; }
+  .key {
+    --cut: 8px;
     font: inherit; font-weight: 500;
     display: inline-flex; align-items: center; gap: 10px;
-    padding: 10px 16px;
-    color: #f2d6ce;
-    background: linear-gradient(#3a1010, #260808);
-    border: 1px solid #5e2020;
-    border-bottom-width: 3px;
-    border-radius: 6px;
+    padding: 10px 16px 12px;
+    color: #d6e3df;
+    background: linear-gradient(#323a3b, #222829);
+    border: 0;
+    box-shadow: inset 0 -3px 0 #0d1010, inset 0 1px 0 rgba(255,255,255,.08);
     cursor: pointer;
+    text-decoration: none;
   }
-  .keys button .led { width: 8px; height: 8px; }
-  .keys button[aria-pressed="true"] { border-bottom-width: 1px; transform: translateY(2px); }
-  .keys button[aria-pressed="true"] .led { background: var(--led-amber); box-shadow: 0 0 8px var(--led-amber); }
-  .keys button:focus-visible, .chart .system:focus-visible .hit, .chart .core:focus-visible .core-disc { outline: 2px solid var(--led-amber); outline-offset: 2px; }
-  .keys .list-link { margin-left: auto; color: #f2d6ce; }
+  .key .led { width: 8px; height: 8px; }
+  .key:hover { background: linear-gradient(#3a4344, #282f30); }
+  .key[aria-pressed="true"] {
+    padding: 12px 16px 10px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.6);
+    color: var(--hot);
+    background: linear-gradient(#1d2b23, #15201a);
+  }
+  .key[aria-pressed="true"] .led { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .key:focus-visible, .chart .system:focus-visible .hit, .chart .core:focus-visible .core-disc { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .key.return { margin-left: auto; }
+  .key.return .led { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
 
   @media (max-width: 860px) {
-    .console {
+    body { padding: 10px 8px 16px; }
+    .hull {
+      padding: 14px 12px 16px;
       grid-template-columns: 1fr;
-      grid-template-areas: "strip" "map" "readout" "keys";
+      grid-template-areas: "top" "map" "readout" "deck";
     }
+    .top .aurebesh, .top .status span:not(.led) { display: none; }
     .chart .system text { font-size: 34px; }
-    .keys { gap: 8px; }
-    .keys button { padding: 8px 12px; }
-    .strip .glyphs { display: none; }
-    .readout .glass { min-height: 0; }
-    .keys .list-link { margin-left: 0; }
+    .screen-bar { padding: 10px 16px 0; font-size: 0.75rem; gap: 10px; }
+    .screen-bar span { white-space: nowrap; }
+    .key { padding: 8px 12px 10px; }
+    .key[aria-pressed="true"] { padding: 10px 12px 8px; }
+    .key.return { margin-left: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     .booting .ring, .booting .border, .booting .system, .booting .sector-name { animation: none; opacity: 1; stroke-dashoffset: 0; }
@@ -203,35 +260,51 @@
 </style>
 </head>
 <body>
-<main class="console">
-  <header class="strip">
-    <svg class="glyphs" id="strip-glyphs" viewBox="0 0 260 22" aria-hidden="true"></svg>
-    <h1>Torin's nav computer</h1>
-    <div class="lights" aria-hidden="true">
-      <span class="led on" id="led-pulse"></span>
-      <span class="led amber on"></span>
-      <span class="led"></span>
-    </div>
-  </header>
+<main class="console chamfer">
+  <div class="hull chamfer">
+    <header class="top">
+      <span class="screw" aria-hidden="true"></span>
+      <h1>Torin's nav computer</h1>
+      <span class="aurebesh" aria-hidden="true">nav computer</span>
+      <div class="status" aria-hidden="true">
+        <span>Uplink</span><span class="led green on"></span>
+        <span>Power</span><span class="led on" id="led-pulse"></span>
+        <span class="screw"></span>
+      </div>
+    </header>
 
-  <section class="screen map" aria-label="Galaxy chart of projects">
-    <div class="glass">
-      <svg class="chart booting" id="chart" viewBox="-250 -40 1500 1080" role="group" aria-label="Sectors and systems"></svg>
-    </div>
-  </section>
+    <section class="bezel chamfer map" aria-label="Galaxy chart of projects">
+      <div class="inner chamfer">
+        <div class="glass chamfer">
+          <div class="screen-bar" aria-hidden="true"><span class="aurebesh">galaxy chart</span><span id="chart-status">6 sectors</span></div>
+          <svg class="chart booting" id="chart" viewBox="-250 -20 1500 1060" role="group" aria-label="Sectors and systems"></svg>
+        </div>
+      </div>
+    </section>
 
-  <section class="screen readout" aria-live="polite">
-    <div class="glass" id="readout"></div>
-  </section>
+    <section class="bezel chamfer readout" aria-live="polite">
+      <div class="inner chamfer">
+        <div class="glass chamfer">
+          <div class="screen-bar" aria-hidden="true"><span class="aurebesh">readout</span><span id="readout-status">Standing by</span></div>
+          <div class="body-wrap" id="readout"></div>
+        </div>
+      </div>
+    </section>
 
-  <nav class="keys" id="keys" aria-label="Sectors"></nav>
+    <nav class="deck chamfer" aria-label="Sectors">
+      <div class="tray chamfer" id="keys">
+        <span class="label">Sectors</span>
+      </div>
+    </nav>
+  </div>
 </main>
 
 <script>
 (() => {
   const SVGNS = "http://www.w3.org/2000/svg";
   const CX = 500, CY = 500, R_CORE = 92, R_IN = 170, R_MID = 320, R_OUT = 470;
-  const README = "https://github.com/torinvdb#readme";
+  const PROFILE = "https://github.com/torinvdb";
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const el = (tag, attrs = {}, parent) => {
     const n = document.createElementNS(SVGNS, tag);
@@ -243,87 +316,66 @@
     const a = (deg - 90) * Math.PI / 180;
     return [CX + r * Math.cos(a), CY + r * Math.sin(a)];
   };
-  const arc = (r, a0, a1) => {
-    const [x0, y0] = polar(r, a0), [x1, y1] = polar(r, a1);
-    return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;
-  };
+  const P = (r, a) => polar(r, a).map(v => v.toFixed(1)).join(" ");
+  // arc along radius r from angle a to angle b, in whichever direction b lies
+  const A = (r, a, b) => `A${r} ${r} 0 0 ${b > a ? 1 : 0} ${P(r, b)}`;
 
-  // Seeded generator so the decorative glyphs are the same on every load.
-  let seed = 1977;
-  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-
-  // Decorative script: each glyph is two or three strokes inside a cell.
-  function glyphs(svg, x, y, count, size, gap) {
-    const g = el("g", { "aria-hidden": "true", class: "glyph-block", fill: "none", "stroke-width": size / 7, "stroke-linecap": "square" }, svg);
-    const pts = [[0, 0], [1, 0], [0, .5], [1, .5], [0, 1], [1, 1], [.5, 0], [.5, 1]];
-    for (let i = 0; i < count; i++) {
-      if (rand() < 0.14) continue;  // word gap
-      let d = "";
-      const n = 2 + Math.floor(rand() * 2);
-      for (let s = 0; s < n; s++) {
-        const a = pts[Math.floor(rand() * pts.length)], b = pts[Math.floor(rand() * pts.length)];
-        if (a === b) continue;
-        const ox = x + i * (size * 0.62 + gap);
-        d += `M${(ox + a[0] * size * .62).toFixed(1)} ${(y + a[1] * size).toFixed(1)}L${(ox + b[0] * size * .62).toFixed(1)} ${(y + b[1] * size).toFixed(1)}`;
-      }
-      el("path", { d }, g);
-    }
-    return g;
-  }
-
-  const state = { data: null, sectorIdx: null, locked: null, nodes: new Map() };
+  const state = { data: null, sectorIdx: null, locked: null, nodes: new Map(), decodeTimer: null };
 
   fetch("nav.json")
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(data => { state.data = data; build(); })
     .catch(() => {
       document.getElementById("readout").innerHTML =
-        `<h2>Chart data didn't load</h2><p class="body">Reload the page, or read the same list on <a href="${README}">GitHub</a>.</p>`;
+        `<h2>Chart data didn't load</h2><p class="body">Reload the page, or go back to <a href="${PROFILE}">the GitHub profile</a>.</p>`;
     });
 
   function build() {
     const { core, sectors } = state.data;
     const chart = document.getElementById("chart");
     const defs = el("defs", {}, chart);
-    const f = el("filter", { id: "glow", x: "-200%", y: "-200%", width: "500%", height: "500%" }, defs);
-    el("feGaussianBlur", { stdDeviation: "4", result: "b" }, f);
+    const f = el("filter", { id: "glow", x: "-50%", y: "-50%", width: "200%", height: "200%" }, defs);
+    el("feGaussianBlur", { stdDeviation: "3.5", result: "b" }, f);
     const m = el("feMerge", {}, f);
     el("feMergeNode", { in: "b" }, m);
     el("feMergeNode", { in: "SourceGraphic" }, m);
 
-    glyphs(document.getElementById("strip-glyphs"), 2, 3, 22, 16, 4);
-    glyphs(chart, -225, -10, 9, 26, 7);
-    glyphs(chart, -225, 28, 6, 18, 6);
+    // corner script in real Aurebesh
+    const cs = el("text", { class: "corner-script", x: -225, y: 30, "font-size": 30, "aria-hidden": "true" }, chart);
+    cs.textContent = "torin";
+    const cs2 = el("text", { class: "corner-script", x: -225, y: 64, "font-size": 20, "aria-hidden": "true" }, chart);
+    cs2.textContent = "sector map";
 
-    // rings
     el("circle", { class: "ring", cx: CX, cy: CY, r: R_IN }, chart);
     el("circle", { class: "ring", cx: CX, cy: CY, r: R_MID }, chart);
     el("circle", { class: "ring main", cx: CX, cy: CY, r: R_OUT }, chart);
 
     const span = 360 / sectors.length;
+    // each border jogs sideways where it crosses the middle ring, like a hand-plotted chart
+    const jogOf = si => (si % 2 ? 5 : -5);
     const route = el("path", { class: "route", d: "" }, chart);
     let order = 0;
 
     sectors.forEach((sec, si) => {
       const a0 = si * span, a1 = a0 + span;
+      const j0 = a0 + jogOf(si), j1 = a1 + jogOf((si + 1) % sectors.length);
       const g = el("g", { class: "sector", "data-sector": si }, chart);
 
-      // wedge fill for highlighting
-      const P = (r, a) => polar(r, a).map(v => v.toFixed(1)).join(" ");
-      el("path", { class: "wedge", d: `M${P(R_OUT, a0)} A${R_OUT} ${R_OUT} 0 0 1 ${P(R_OUT, a1)} L${P(R_IN, a1)} A${R_IN} ${R_IN} 0 0 0 ${P(R_IN, a0)} Z` }, g);
+      // highlight shape that follows both stepped borders exactly
+      el("path", {
+        class: "wedge",
+        d: `M${P(R_IN, a0)} L${P(R_MID, a0)} ${A(R_MID, a0, j0)} L${P(R_OUT, j0)} ${A(R_OUT, j0, j1)} ` +
+           `L${P(R_MID, j1)} ${A(R_MID, j1, a1)} L${P(R_IN, a1)} ${A(R_IN, a1, a0)} Z`
+      }, g);
 
-      // stepped sector border, like a hand-plotted chart
-      const jog = si % 2 ? 5 : -5;
-      el("path", { class: "border", d: `M${P(R_IN, a0)} L${P(R_MID, a0)} A${R_MID} ${R_MID} 0 0 ${jog > 0 ? 1 : 0} ${P(R_MID, a0 + jog)} L${P(R_OUT, a0 + jog)}` }, chart);
+      el("path", { class: "border", d: `M${P(R_IN, a0)} L${P(R_MID, a0)} ${A(R_MID, a0, j0)} L${P(R_OUT, j0)}` }, chart);
 
-      // sector name outside the rim
       const mid = a0 + span / 2;
       const [nx, ny] = polar(R_OUT + 40, mid);
       const anchor = Math.abs(nx - CX) < 40 ? "middle" : nx > CX ? "start" : "end";
       const name = el("text", { class: "sector-name", x: nx.toFixed(1), y: (ny + 7).toFixed(1), "text-anchor": anchor, style: `--i:${order++}` }, g);
       name.textContent = sec.name;
 
-      // systems: spread across the wedge in two staggered bands
       const n = sec.systems.length;
       sec.systems.forEach((sys, k) => {
         // three radial bands, angles spread across the wedge, so labels don't stack
@@ -357,7 +409,6 @@
 
     relax();
 
-    // core
     const coreG = el("g", { class: "core", tabindex: "0", role: "button", "aria-label": `${core.name}, ${core.role}` }, chart);
     el("circle", { class: "core-disc", cx: CX, cy: CY, r: R_CORE }, coreG);
     const t1 = el("text", { x: CX, y: CY + 4 }, coreG); t1.textContent = core.name;
@@ -365,32 +416,33 @@
     coreG.addEventListener("click", () => reset());
     coreG.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); reset(); } });
 
-    // targeting box (corner brackets)
-    const tgt = el("path", { class: "target", d: "M-24 -10V-24H-10M10 -24H24V-10M24 10V24H10M-10 24H-24V10" }, chart);
+    const tgt = el("path", { class: "target", d: "M-26 -11V-26H-11M11 -26H26V-11M26 11V26H11M-11 26H-26V11" }, chart);
     state.tgt = tgt; state.route = route; state.chart = chart;
 
-    // sector keys
     const keys = document.getElementById("keys");
     sectors.forEach((sec, si) => {
       const b = document.createElement("button");
       b.type = "button";
+      b.className = "key chamfer sector-key";
       b.setAttribute("aria-pressed", "false");
       b.innerHTML = `<span class="led" aria-hidden="true"></span>`;
       b.append(sec.name);
       b.addEventListener("click", () => selectSector(state.sectorIdx === si ? null : si));
       keys.appendChild(b);
     });
-    const list = document.createElement("a");
-    list.className = "list-link";
-    list.href = README;
-    list.textContent = "Read it as a list";
-    keys.appendChild(list);
+    const back = document.createElement("a");
+    back.className = "key chamfer return";
+    back.href = PROFILE;
+    back.innerHTML = `<span class="led" aria-hidden="true"></span>Return to GitHub`;
+    keys.appendChild(back);
+
+    document.getElementById("chart-status").textContent =
+      `${sectors.length} sectors, ${state.nodes.size} systems`;
 
     document.addEventListener("keydown", e => { if (e.key === "Escape") reset(); });
     setTimeout(() => chart.classList.remove("booting"), 2200);
-    // slow heartbeat on one indicator
-    const led = document.getElementById("led-pulse");
-    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!reduced) {
+      const led = document.getElementById("led-pulse");
       setInterval(() => led.classList.toggle("on"), 900);
     }
     renderCore();
@@ -398,10 +450,9 @@
 
   // Nudge systems along their radius until no two labels overlap.
   function relax() {
-    const items = [...state.nodes.values()].map(n => {
-      const ang = Math.atan2(n.y - CY, n.x - CX);
-      return { n, ang, r: Math.hypot(n.x - CX, n.y - CY) };
-    });
+    const items = [...state.nodes.values()].map(n => ({
+      n, ang: Math.atan2(n.y - CY, n.x - CX), r: Math.hypot(n.x - CX, n.y - CY)
+    }));
     const place = it => {
       const x = CX + it.r * Math.cos(it.ang), y = CY + it.r * Math.sin(it.ang);
       const [hit, dot, label] = it.n.node.children;
@@ -450,10 +501,12 @@
     state.route.classList.add("on");
   }
 
-  function preview(id) { moveTarget(id); renderSystem(id); }
+  const setStatus = s => { document.getElementById("readout-status").textContent = s; };
+
+  function preview(id) { if (state.locked === id) return; moveTarget(id); renderSystem(id, false); }
   function restore() {
     moveTarget(state.locked);
-    if (state.locked) renderSystem(state.locked);
+    if (state.locked) renderSystem(state.locked, false, true);
     else if (state.sectorIdx !== null) renderSector(state.sectorIdx);
     else renderCore();
   }
@@ -462,7 +515,7 @@
     state.locked = id;
     state.nodes.get(id).node.classList.add("locked");
     selectSector(state.nodes.get(id).si, true);
-    drawRoute(id); moveTarget(id); renderSystem(id);
+    drawRoute(id); moveTarget(id); renderSystem(id, true);
   }
   function reset() {
     if (state.locked) state.nodes.get(state.locked).node.classList.remove("locked");
@@ -474,7 +527,7 @@
     state.sectorIdx = si;
     state.chart.classList.toggle("has-active", si !== null);
     state.chart.querySelectorAll(".sector").forEach(g => g.classList.toggle("active", +g.dataset.sector === si));
-    document.querySelectorAll("#keys button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === si)));
+    document.querySelectorAll("#keys .sector-key").forEach((b, i) => b.setAttribute("aria-pressed", String(i === si)));
     if (quiet) return;
     if (state.locked && state.nodes.get(state.locked).si !== si) {
       state.nodes.get(state.locked).node.classList.remove("locked");
@@ -485,21 +538,27 @@
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const linkRow = links => links.length
-    ? `<div class="links">${links.map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("")}</div>`
+    ? `<div class="links">${links.map(l => `<a class="chamfer" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("")}</div>`
     : `<p class="no-links">No public write-up for this one.</p>`;
 
+  function stopDecode() { if (state.decodeTimer) { cancelAnimationFrame(state.decodeTimer); state.decodeTimer = null; } }
+
   function renderCore() {
+    stopDecode();
     const c = state.data.core;
+    setStatus("Standing by");
     document.getElementById("readout").innerHTML = `
       <p class="sector-line">Core</p>
       <h2>${esc(c.name)}</h2>
       <p class="kind">${esc(c.role)}</p>
       <p class="body">${esc(c.summary)}</p>
-      <p class="hint">Point at a system, tap it or tab to it to read about it. Click or tap to plot a route. Pick a sector below to filter the chart, and press Escape to clear.</p>
+      <p class="hint">Point at a system, tap it or tab to it to read about it. Click or tap to lock it and decode the full readout. Sector keys filter the chart, and Escape clears.</p>
       ${linkRow(c.links)}`;
   }
   function renderSector(si) {
+    stopDecode();
     const s = state.data.sectors[si];
+    setStatus("Sector");
     document.getElementById("readout").innerHTML = `
       <p class="sector-line">Sector</p>
       <h2>${esc(s.name)}</h2>
@@ -507,16 +566,64 @@
       <ul class="roster">${s.systems.map(y => `<li><button type="button" data-id="${esc(y.id)}">${esc(y.name)}</button></li>`).join("")}</ul>`;
     document.querySelectorAll("#readout .roster button").forEach(b => b.addEventListener("click", () => lock(b.dataset.id)));
   }
-  function renderSystem(id) {
+  function renderSystem(id, decode, settled) {
+    stopDecode();
     const { sys, si } = state.nodes.get(id);
     const sec = state.data.sectors[si];
     const meta = [sys.kind, sys.year].filter(Boolean).join(", ");
-    document.getElementById("readout").innerHTML = `
-      <p class="sector-line">${esc(sec.name)}</p>
-      <h2>${esc(sys.name)}</h2>
-      <p class="kind">${esc(meta)}</p>
-      <p class="body">${esc(sys.text)}</p>
+    setStatus(state.locked === id ? "Locked" : "Preview");
+    const box = document.getElementById("readout");
+    box.innerHTML = `
+      <p class="sector-line" data-decode>${esc(sec.name)}</p>
+      <h2 data-decode>${esc(sys.name)}</h2>
+      <p class="kind" data-decode>${esc(meta)}</p>
+      <p class="body" data-decode>${esc(sys.text)}</p>
       ${linkRow(sys.links)}`;
+    if (decode && !settled && !reduced) decodeIn(box);
+  }
+
+  // Show the readout in Aurebesh, then translate it to English left to right,
+  // a terminal-style sweep with a short run of flickering glyphs at the cursor.
+  function decodeIn(box) {
+    const ALPHA = "abcdefghijklmnopqrstuvwxyz";
+    const fields = [...box.querySelectorAll("[data-decode]")].map(node => {
+      const text = node.textContent;
+      node.setAttribute("aria-label", text);
+      node.textContent = "";
+      const chars = [...text].map(ch => {
+        const s = document.createElement("span");
+        s.textContent = ch;
+        s.className = "ab";
+        s.setAttribute("aria-hidden", "true");
+        node.appendChild(s);
+        return { s, ch };
+      });
+      return { node, chars };
+    });
+    setStatus("Decoding");
+    const all = fields.flatMap(f => f.chars);
+    // titles resolve fast; long bodies resolve in chunks so the whole sweep stays under ~1.3 s
+    const total = all.length;
+    const duration = Math.min(1300, 420 + total * 4);
+    const start = performance.now();
+    const tick = now => {
+      const done = Math.min(total, Math.floor(((now - start) / duration) * total));
+      for (let i = 0; i < total; i++) {
+        const c = all[i];
+        if (i < done) { c.s.className = ""; c.s.textContent = c.ch; }
+        else if (i < done + 6 && /[a-z]/i.test(c.ch)) {
+          c.s.className = "ab cursor";
+          c.s.textContent = ALPHA[(Math.random() * 26) | 0];
+        } else { c.s.className = "ab"; c.s.textContent = c.ch; }
+      }
+      if (done < total) state.decodeTimer = requestAnimationFrame(tick);
+      else {
+        state.decodeTimer = null;
+        fields.forEach(f => { f.node.textContent = f.node.getAttribute("aria-label"); f.node.removeAttribute("aria-label"); });
+        setStatus("Locked");
+      }
+    };
+    state.decodeTimer = requestAnimationFrame(tick);
   }
 })();
 </script>
